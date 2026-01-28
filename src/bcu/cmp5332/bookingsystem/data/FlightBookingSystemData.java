@@ -2,11 +2,12 @@ package bcu.cmp5332.bookingsystem.data;
 
 
 
-import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
-import bcu.cmp5332.bookingsystem.model.FlightBookingSystem;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
+import bcu.cmp5332.bookingsystem.model.FlightBookingSystem;
 
 public class FlightBookingSystemData {
     
@@ -16,7 +17,7 @@ public class FlightBookingSystemData {
     static {
         dataManagers.add(new FlightDataManager());
         
-        
+          
          dataManagers.add(new CustomerDataManager());
          dataManagers.add(new BookingDataManager());
     }

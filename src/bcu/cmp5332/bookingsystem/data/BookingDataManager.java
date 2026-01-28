@@ -1,16 +1,18 @@
 package bcu.cmp5332.bookingsystem.data;
 
-import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
-import bcu.cmp5332.bookingsystem.model.FlightBookingSystem;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.LocalDate;
 
+import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
 import bcu.cmp5332.bookingsystem.model.Booking;
 import bcu.cmp5332.bookingsystem.model.Customer;
 import bcu.cmp5332.bookingsystem.model.Flight;
-
-import java.io.*;
-import java.time.LocalDate;
-
-import java.io.IOException;
+import bcu.cmp5332.bookingsystem.model.FlightBookingSystem;
 
 public class BookingDataManager implements DataManager {
     
@@ -54,13 +56,13 @@ public class BookingDataManager implements DataManager {
 
     @Override
     public void storeData(FlightBookingSystem fbs) throws IOException {
-    	File file = new File(RESOURCE);
+        File file = new File(RESOURCE);
         file.getParentFile().mkdirs();
 
         try (PrintWriter pw = new PrintWriter(new FileWriter(file))) {
 
-            for (var customer : fbs.getCustomers()) {
-                for (var booking : customer.getBookings()) {
+            for (Customer customer : fbs.getCustomers()) {
+                for (Booking booking : customer.getBookings()) {
                     pw.println(
                             customer.getId() + "::"
                           + booking.getFlight().getId() + "::"
@@ -70,5 +72,5 @@ public class BookingDataManager implements DataManager {
             }
         }
     }
-    
+
 }

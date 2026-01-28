@@ -1,8 +1,9 @@
 package bcu.cmp5332.bookingsystem.data;
 
+import java.io.IOException;
+
 import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
 import bcu.cmp5332.bookingsystem.model.FlightBookingSystem;
-import java.io.IOException;
 
 public interface DataManager {
     

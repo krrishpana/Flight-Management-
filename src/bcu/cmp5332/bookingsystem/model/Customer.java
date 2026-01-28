@@ -1,8 +1,9 @@
 package bcu.cmp5332.bookingsystem.model;
 
-import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
 import java.util.ArrayList;
 import java.util.List;
+
+import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
 
 public class Customer {
 

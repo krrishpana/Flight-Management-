@@ -1,12 +1,17 @@
 package bcu.cmp5332.bookingsystem.model;
 
-import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
 
 public class FlightBookingSystem {
     
-    private final LocalDate systemDate = LocalDate.parse("2024-11-11");
+    private final LocalDate systemDate = LocalDate.parse("2026-01-26");
     
     private final Map<Integer, Customer> customers = new TreeMap<>();
     private final Map<Integer, Flight> flights = new TreeMap<>();
@@ -25,6 +30,11 @@ public class FlightBookingSystem {
             throw new FlightBookingSystemException("There is no flight with that ID.");
         }
         return flights.get(id);
+    }
+    
+    public List<Customer> getCustomers() {
+        List<Customer> out = new ArrayList<>(customers.values());
+        return Collections.unmodifiableList(out);
     }
 
     public Customer getCustomerByID(int id) throws FlightBookingSystemException {
