@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
@@ -109,7 +110,7 @@ public class AddFlightWindow extends JFrame implements ActionListener {
             mw.displayFlights();
             // hide (close) the AddFlightWindow
             this.setVisible(false);
-        } catch (FlightBookingSystemException ex) {
+        } catch (FlightBookingSystemException | IOException ex) {
             JOptionPane.showMessageDialog(this, ex, "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
