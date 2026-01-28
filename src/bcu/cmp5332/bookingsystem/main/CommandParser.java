@@ -6,11 +6,18 @@ import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
+import bcu.cmp5332.bookingsystem.commands.AddBooking;
+import bcu.cmp5332.bookingsystem.commands.AddCustomer;
 import bcu.cmp5332.bookingsystem.commands.AddFlight;
+import bcu.cmp5332.bookingsystem.commands.CancelBooking;
 import bcu.cmp5332.bookingsystem.commands.Command;
+import bcu.cmp5332.bookingsystem.commands.EditBooking;
 import bcu.cmp5332.bookingsystem.commands.Help;
+import bcu.cmp5332.bookingsystem.commands.ListCustomers;
 import bcu.cmp5332.bookingsystem.commands.ListFlights;
 import bcu.cmp5332.bookingsystem.commands.LoadGUI;
+import bcu.cmp5332.bookingsystem.commands.ShowCustomer;
+import bcu.cmp5332.bookingsystem.commands.ShowFlight;
 
 public class CommandParser {
     
@@ -33,14 +40,20 @@ public class CommandParser {
 
                 return new AddFlight(flighNumber, origin, destination, departureDate);
             } else if (cmd.equals("addcustomer")) {
-                
+                BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+                System.out.print("Name: ");
+                String name = reader.readLine();
+                System.out.print("Phone: ");
+                String phone = reader.readLine();
+
+                return new AddCustomer(name, phone);
             } else if (cmd.equals("loadgui")) {
                 return new LoadGUI();
             } else if (parts.length == 1) {
                 if (line.equals("listflights")) {
                     return new ListFlights();
                 } else if (line.equals("listcustomers")) {
-                    
+                    return new ListCustomers();
                 } else if (line.equals("help")) {
                     return new Help();
                 }
@@ -48,23 +61,24 @@ public class CommandParser {
                 int id = Integer.parseInt(parts[1]);
 
                 if (cmd.equals("showflight")) {
-                    
+                    return new ShowFlight(id);
                 } else if (cmd.equals("showcustomer")) {
-                    
+                    return new ShowCustomer(id);
                 }
             } else if (parts.length == 3) {
-                
+                int id1 = Integer.parseInt(parts[1]);
+                int id2 = Integer.parseInt(parts[2]);
 
                 if (cmd.equals("addbooking")) {
-                    
+                    return new AddBooking(id1, id2);
                 } else if (cmd.equals("editbooking")) {
                     
                 } else if (cmd.equals("cancelbooking")) {
-                    
+                    return new CancelBooking(id1, id2);
                 }
             }
         } catch (NumberFormatException ex) {
-
+            throw new FlightBookingSystemException("Invalid number format for ID.");
         }
 
         throw new FlightBookingSystemException("Invalid command.");

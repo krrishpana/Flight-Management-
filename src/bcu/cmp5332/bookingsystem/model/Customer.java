@@ -30,7 +30,8 @@ public class Customer {
     }
 
     // Getters
-    public int getId() {
+    public int getId()
+    {
         return id;
     }
 
@@ -61,7 +62,58 @@ public class Customer {
         this.phone = phone;
     }
 
-    public void addBooking(Booking booking) {
+
+    public String getDetailsShort() {
+        return "Customer #" + id + " Name: " + name + " Phone: " + phone;
+    }
+
+    public String getDetailsLong() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getDetailsShort());
+        sb.append("\n\nBookings:\n");
+
+        for (Booking booking : bookings) {
+            sb.append("* Booking date: ");
+            sb.append(booking.getBookingDate());
+            sb.append(" for ");
+            sb.append(booking.getFlight().getDetailsShort());
+            sb.append("\n");
+        }
+
+        sb.append(bookings.size());
+        sb.append(" booking(s)");
+
+        return sb.toString();
+    }
+
+    public void addBooking(Booking booking) throws FlightBookingSystemException {
+        // Check for duplicate booking for the same flight
+        for (Booking existingBooking : bookings) {
+            if (existingBooking.getFlight().getId() == booking.getFlight().getId()) {
+                throw new FlightBookingSystemException(
+                        "Customer already has a booking for flight #" + booking.getFlight().getId()
+                );
+            }
+        }
+
         bookings.add(booking);
+    }
+
+    public void cancelBookingForFlight(Flight flight) throws FlightBookingSystemException {
+        Booking bookingToRemove = null;
+        for (Booking booking : bookings) {
+            if (booking.getFlight().getId() == flight.getId()) {
+                bookingToRemove = booking;
+                break;
+            }
+        }
+
+        if (bookingToRemove == null) {
+            throw new FlightBookingSystemException(
+                    "No booking found for flight #" + flight.getId()
+            );
+        }
+
+        bookings.remove(bookingToRemove);
     }
 }
