@@ -10,6 +10,24 @@ import java.util.TreeMap;
 import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
 
 public class FlightBookingSystem {
+    private Customer currentUser;
+
+    // Add these methods
+    public Customer getCurrentUser() {
+        return currentUser;
+    }
+
+    public void setCurrentUser(Customer user) {
+        this.currentUser = user;
+    }
+
+    public boolean isLoggedIn() {
+        return currentUser != null;
+    }
+
+    public boolean isAdmin() {
+        return currentUser != null && currentUser.isAdmin();
+    }
     
     private final LocalDate systemDate = LocalDate.parse("2026-01-26");
     

@@ -53,32 +53,65 @@ public class CustomerManagementPanel extends CommandBasePanel {
     }
 
     private void showAddCustomerDialog() {
-        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+        // Increased grid rows to accommodate 8 fields
+        JPanel panel = new JPanel(new GridLayout(9, 2, 10, 10));
 
         JTextField nameField = new JTextField();
         JTextField phoneField = new JTextField();
+        JTextField emailField = new JTextField();
+        JTextField ageField = new JTextField();
+        JTextField usernameField = new JTextField();
+        JPasswordField passwordField = new JPasswordField();
+        JTextField foodField = new JTextField();
+        JCheckBox hasChildCheckBox = new JCheckBox("Yes");
 
         panel.add(new JLabel("Name:"));
         panel.add(nameField);
         panel.add(new JLabel("Phone:"));
         panel.add(phoneField);
+        panel.add(new JLabel("Email:"));
+        panel.add(emailField);
+        panel.add(new JLabel("Age:"));
+        panel.add(ageField);
+        panel.add(new JLabel("Username:"));
+        panel.add(usernameField);
+        panel.add(new JLabel("Password:"));
+        panel.add(passwordField);
+        panel.add(new JLabel("Food Preference:"));
+        panel.add(foodField);
+        panel.add(new JLabel("Has Child Under 2?"));
+        panel.add(hasChildCheckBox);
 
         int result = JOptionPane.showConfirmDialog(this, panel,
                 "Add New Customer", JOptionPane.OK_CANCEL_OPTION);
 
         if (result == JOptionPane.OK_OPTION) {
             try {
+                // Collect and trim values
                 String name = nameField.getText().trim();
                 String phone = phoneField.getText().trim();
+                String email = emailField.getText().trim();
+                String ageStr = ageField.getText().trim();
+                String username = usernameField.getText().trim();
+                String password = new String(passwordField.getPassword());
+                String food = foodField.getText().trim();
+                boolean hasChild = hasChildCheckBox.isSelected();
 
-                if (name.isEmpty() || phone.isEmpty()) {
-                    throw new IllegalArgumentException("Name and phone are required.");
+                // Basic validation
+                if (name.isEmpty() || phone.isEmpty() || email.isEmpty() || username.isEmpty() || password.isEmpty()) {
+                    throw new IllegalArgumentException("All main fields are required.");
                 }
 
-                AddCustomer command = new AddCustomer(name, phone);
-                command.execute(flightBookingSystem);
-                showSuccess("Customer added successfully!");
+                int age = Integer.parseInt(ageStr);
 
+                // Execute command with all 8 parameters
+                AddCustomer command = new AddCustomer(name, phone, email, age, username, password, food, hasChild);
+                command.execute(flightBookingSystem);
+
+                showSuccess("Customer " + name + " added successfully!");
+
+            } catch (NumberFormatException e) {
+                showError("Age must be a valid number.");
             } catch (IllegalArgumentException | FlightBookingSystemException e) {
                 showError(e.getMessage());
             }

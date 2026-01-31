@@ -3,27 +3,48 @@ package bcu.cmp5332.bookingsystem.commands;
 import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
 import bcu.cmp5332.bookingsystem.model.Customer;
 import bcu.cmp5332.bookingsystem.model.FlightBookingSystem;
+import bcu.cmp5332.bookingsystem.model.UserRole;
 
 public class AddCustomer implements Command {
 
     private final String name;
     private final String phone;
+    private final String email;
+    private final int age;
+    private final String username;
+    private final String password;
+    private final String foodPreference;
+    private final boolean hasChildUnderTwo;
 
-    public AddCustomer(String name, String phone) {
+    // Constructor with ALL 8 parameters
+    public AddCustomer(String name, String phone, String email, int age,
+                       String username, String password, String foodPreference,
+                       boolean hasChildUnderTwo) {
         this.name = name;
         this.phone = phone;
+        this.email = email;
+        this.age = age;
+        this.username = username;
+        this.password = password;
+        this.foodPreference = foodPreference;
+        this.hasChildUnderTwo = hasChildUnderTwo;
     }
 
     @Override
     public void execute(FlightBookingSystem flightBookingSystem) throws FlightBookingSystemException {
-            int nextCustomerId = flightBookingSystem.getCustomers().size() + 1;
+        int nextCustomerId = flightBookingSystem.getCustomers().size() + 1;
 
-            Customer customer = new Customer(nextCustomerId, name, phone);
-            flightBookingSystem.addCustomer(customer);
+        // Create customer with all 8 fields
+        Customer customer = new Customer(nextCustomerId, name, phone, email, age,
+                username, password, foodPreference,
+                hasChildUnderTwo, UserRole.CUSTOMER);
 
-            System.out.println("Customer added successfully:");
-            System.out.println("ID: " + customer.getId()
-                    + ", Name: " + customer.getName()
-                    + ", Phone: " + customer.getPhone());
+        flightBookingSystem.addCustomer(customer);
+
+        System.out.println("Customer registered successfully:");
+        System.out.println("ID: " + customer.getId() +
+                ", Name: " + customer.getName() +
+                ", Username: " + customer.getUsername() +
+                ", Email: " + customer.getEmail());
     }
 }

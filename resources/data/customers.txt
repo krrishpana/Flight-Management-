@@ -1,3 +1,5 @@
-1::Abdel-Rahman Tawil::07555555555
-2::Kostas Vlachos::07596454545
-3::Hyandri Maharjan::9841985769
+1::Abdel-Rahman Tawil::07555555555::default@gmail.com::18::user1::password123::Non-Veg::false::CUSTOMER
+2::Kostas Vlachos::07596454545::default@gmail.com::18::user2::password123::Non-Veg::false::CUSTOMER
+3::Krrishpana Karmacharya::9861456710::default@gmail.com::18::user3::password123::Non-Veg::false::CUSTOMER
+4::Hyandri Maharjan::9841985769::default@gmail.com::18::user4::password123::Non-Veg::false::CUSTOMER
+5::Kasmita Koirala::9876654621::kasmita12@gmail.com::20::kasmita::123456::Non-veg::false::CUSTOMER

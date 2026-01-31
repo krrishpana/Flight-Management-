@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Flight-Management-.iml" filepath="$PROJECT_DIR$/Flight-Management-.iml" />
+      <module fileurl="file://$PROJECT_DIR$/FlightBookingSystem_Dist.iml" filepath="$PROJECT_DIR$/FlightBookingSystem_Dist.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../FlightBookingSystem_Dis/untitled/untitled.iml" filepath="$PROJECT_DIR$/../FlightBookingSystem_Dis/untitled/untitled.iml" />
     </modules>
   </component>
 </project>
