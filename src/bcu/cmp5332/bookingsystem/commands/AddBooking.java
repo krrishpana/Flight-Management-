@@ -6,6 +6,8 @@ import bcu.cmp5332.bookingsystem.model.Customer;
 import bcu.cmp5332.bookingsystem.model.Flight;
 import bcu.cmp5332.bookingsystem.model.FlightBookingSystem;
 
+import java.time.LocalDate;
+
 public class AddBooking implements Command {
 
     private final int customerId;
@@ -18,21 +20,34 @@ public class AddBooking implements Command {
 
     @Override
     public void execute(FlightBookingSystem flightBookingSystem) throws FlightBookingSystemException {
-        // Get the customer and flight by ID (may throw FlightBookingSystemException)
         Customer customer = flightBookingSystem.getCustomerByID(customerId);
         Flight flight = flightBookingSystem.getFlightByID(flightId);
 
-        // Create a new Booking with current system date
-        Booking booking = new Booking(customer, flight, flightBookingSystem.getSystemDate());
+        if (flight.isFull()) {
+            throw new FlightBookingSystemException("Flight #" + flightId + " is fully booked.");
+        }
 
-        // Add booking to customer's list of bookings
+        LocalDate systemDate = flightBookingSystem.getSystemDate();
+        if (flight.getDepartureDate().isBefore(systemDate)) {
+            throw new FlightBookingSystemException(
+                    "Cannot book a flight that has already departed. " +
+                            "Flight departed on: " + flight.getDepartureDate()
+            );
+        }
+        double currentPrice = flight.getCurrentPrice(flightBookingSystem.getSystemDate());
+        double flightCancellationFee = flight.getCancellationFee();
+
+        // Get simplified pricing summary
+        String pricingSummary = flight.getPricingSummary(flightBookingSystem.getSystemDate());
+
+        Booking booking = new Booking(customer, flight, flightBookingSystem.getSystemDate(),
+                currentPrice, flightCancellationFee);
+
         customer.addBooking(booking);
-
-        // Add customer to flight's passengers
         flight.addPassenger(customer);
 
-        // Display success message
-        System.out.println("Booking issued successfully to customer #" + customerId +
-                " for flight #" + flightId);
-    }
-}
+        // Show minimal pricing info
+        System.out.println("\n" + pricingSummary);
+        System.out.println("Cancellation Fee: £" + String.format("%.2f", flightCancellationFee));
+        System.out.println("\n Booking confirmed for customer #" + customerId);
+    }}

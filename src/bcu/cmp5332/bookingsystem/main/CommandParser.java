@@ -6,18 +6,7 @@ import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
-import bcu.cmp5332.bookingsystem.commands.AddBooking;
-import bcu.cmp5332.bookingsystem.commands.AddCustomer;
-import bcu.cmp5332.bookingsystem.commands.AddFlight;
-import bcu.cmp5332.bookingsystem.commands.CancelBooking;
-import bcu.cmp5332.bookingsystem.commands.Command;
-import bcu.cmp5332.bookingsystem.commands.EditBooking;
-import bcu.cmp5332.bookingsystem.commands.Help;
-import bcu.cmp5332.bookingsystem.commands.ListCustomers;
-import bcu.cmp5332.bookingsystem.commands.ListFlights;
-import bcu.cmp5332.bookingsystem.commands.LoadGUI;
-import bcu.cmp5332.bookingsystem.commands.ShowCustomer;
-import bcu.cmp5332.bookingsystem.commands.ShowFlight;
+import bcu.cmp5332.bookingsystem.commands.*;
 
 public class CommandParser {
     
@@ -26,11 +15,11 @@ public class CommandParser {
             String[] parts = line.split(" ", 3);
             String cmd = parts[0];
 
-            
+
             if (cmd.equals("addflight")) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
                 System.out.print("Flight Number: ");
-                String flighNumber = reader.readLine();
+                String flightNumber = reader.readLine();
                 System.out.print("Origin: ");
                 String origin = reader.readLine();
                 System.out.print("Destination: ");
@@ -38,7 +27,53 @@ public class CommandParser {
 
                 LocalDate departureDate = parseDateWithAttempts(reader);
 
-                return new AddFlight(flighNumber, origin, destination, departureDate);
+                System.out.print("Capacity: ");
+                int capacity;
+                while (true) {
+                    try {
+                        capacity = Integer.parseInt(reader.readLine());
+                        if (capacity <= 0) {
+                            System.out.print("Capacity must be positive. Please enter again: ");
+                            continue;
+                        }
+                        break;
+                    } catch (NumberFormatException e) {
+                        System.out.print("Invalid number. Please enter capacity as integer: ");
+                    }
+                }
+
+                System.out.print("Base Price (£): ");
+                double basePrice;
+                while (true) {
+                    try {
+                        basePrice = Double.parseDouble(reader.readLine());
+                        if (basePrice < 0) {
+                            System.out.print("Base price cannot be negative. Please enter again: ");
+                            continue;
+                        }
+                        break;
+                    } catch (NumberFormatException e) {
+                        System.out.print("Invalid amount. Please enter base price as number: ");
+                    }
+                }
+
+                System.out.print("Cancellation Fee (£): ");
+                double cancellationFee;
+                while (true) {
+                    try {
+                        cancellationFee = Double.parseDouble(reader.readLine());
+                        if (cancellationFee < 0) {
+                            System.out.print("Cancellation fee cannot be negative. Please enter again: ");
+                            continue;
+                        }
+                        break;
+                    } catch (NumberFormatException e) {
+                        System.out.print("Invalid amount. Please enter cancellation fee as number: ");
+                    }
+                }
+
+                return new AddFlight(flightNumber, origin, destination, departureDate,
+                        basePrice, cancellationFee, capacity);
             } else if (cmd.equals("addcustomer")) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
                 System.out.print("Name: ");
@@ -75,6 +110,8 @@ public class CommandParser {
                     
                 } else if (cmd.equals("cancelbooking")) {
                     return new CancelBooking(id1, id2);
+                } else if (cmd.equals("undocancel")) {  // ADD THIS LINE
+                    return new UndoCancelBooking(id1, id2);  // ADD THIS LINE
                 }
             }
         } catch (NumberFormatException ex) {
@@ -88,11 +125,17 @@ public class CommandParser {
         if (attempts < 1) {
             throw new IllegalArgumentException("Number of attempts should be higher that 0");
         }
+        LocalDate systemDate = LocalDate.now();
         while (attempts > 0) {
             attempts--;
             System.out.print("Departure Date (\"YYYY-MM-DD\" format): ");
             try {
                 LocalDate departureDate = LocalDate.parse(br.readLine());
+                if (departureDate.isBefore(systemDate)) {
+                    System.out.println("Departure date cannot be in the past. " +
+                            attempts + " attempts remaining...");
+                    continue; // Don't count this as a failed attempt for format
+                }
                 return departureDate;
             } catch (DateTimeParseException dtpe) {
                 System.out.println("Date must be in YYYY-MM-DD format. " + attempts + " attempts remaining...");

@@ -34,19 +34,21 @@ public class BookingDataManager implements DataManager {
                 }
 
                 String[] parts = line.split("::");
-                if (parts.length != 3) {
+                if (parts.length != 5) {
                     throw new FlightBookingSystemException(
-                            "Invalid booking data format: " + line);
+                            "Invalid booking data format. Expected 5 fields, found " + parts.length + ": " + line);
                 }
 
                 int customerId = Integer.parseInt(parts[0]);
                 int flightId = Integer.parseInt(parts[1]);
                 LocalDate bookingDate = LocalDate.parse(parts[2]);
+                double paidPrice = Double.parseDouble(parts[3]);
+                double cancellationFee = Double.parseDouble(parts[4]);
 
                 Customer customer = fbs.getCustomerByID(customerId);
                 Flight flight = fbs.getFlightByID(flightId);
 
-                Booking booking = new Booking(customer, flight, bookingDate);
+                Booking booking = new Booking(customer, flight, bookingDate, paidPrice, cancellationFee);
 
                 customer.addBooking(booking);
                 flight.addPassenger(customer);
@@ -63,10 +65,13 @@ public class BookingDataManager implements DataManager {
 
             for (Customer customer : fbs.getCustomers()) {
                 for (Booking booking : customer.getBookings()) {
+                    // Write new format with 5 fields
                     pw.println(
                             customer.getId() + "::"
-                          + booking.getFlight().getId() + "::"
-                          + booking.getBookingDate()
+                                    + booking.getFlight().getId() + "::"
+                                    + booking.getBookingDate() + "::"
+                                    + booking.getPaidPrice() + "::"
+                                    + booking.getCancellationFee()
                     );
                 }
             }

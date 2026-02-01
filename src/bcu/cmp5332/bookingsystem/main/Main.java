@@ -11,12 +11,12 @@ import bcu.cmp5332.bookingsystem.model.FlightBookingSystem;
 public class Main {
 
     public static void main(String[] args) throws IOException, FlightBookingSystemException {
-        
+
         FlightBookingSystem fbs = FlightBookingSystemData.load();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        System.out.println("Flight Booking System");
+        System.out.println("Flight Booking System - CLI");
         System.out.println("Enter 'help' to see a list of available commands.");
         while (true) {
             System.out.print("> ");

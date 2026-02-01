@@ -77,6 +77,8 @@ public class Customer {
             sb.append(booking.getBookingDate());
             sb.append(" for ");
             sb.append(booking.getFlight().getDetailsShort());
+            sb.append(" - Price Paid: £").append(String.format("%.2f", booking.getPaidPrice()));
+            sb.append(", Cancellation Fee: £").append(String.format("%.2f", booking.getCancellationFee()));
             sb.append("\n");
         }
 

@@ -6,6 +6,7 @@ import bcu.cmp5332.bookingsystem.model.FlightBookingSystem;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
@@ -55,12 +56,15 @@ public class FlightManagementPanel extends CommandBasePanel {
     }
 
     private void showAddFlightDialog() {
-        JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(7, 2, 10, 10));
 
         JTextField flightNumberField = new JTextField();
         JTextField originField = new JTextField();
         JTextField destinationField = new JTextField();
         JTextField dateField = new JTextField();
+        JTextField capacityField = new JTextField();
+        JTextField basePriceField = new JTextField();
+        JTextField cancellationFeeField = new JTextField();
 
         panel.add(new JLabel("Flight Number:"));
         panel.add(flightNumberField);
@@ -70,6 +74,12 @@ public class FlightManagementPanel extends CommandBasePanel {
         panel.add(destinationField);
         panel.add(new JLabel("Departure Date (YYYY-MM-DD):"));
         panel.add(dateField);
+        panel.add(new JLabel("Capacity:"));
+        panel.add(capacityField);
+        panel.add(new JLabel("Base Price (£):"));
+        panel.add(basePriceField);
+        panel.add(new JLabel("Cancellation Fee (£):"));
+        panel.add(cancellationFeeField);
 
         int result = JOptionPane.showConfirmDialog(this, panel,
                 "Add New Flight", JOptionPane.OK_CANCEL_OPTION);
@@ -79,20 +89,47 @@ public class FlightManagementPanel extends CommandBasePanel {
                 String flightNumber = flightNumberField.getText().trim();
                 String origin = originField.getText().trim();
                 String destination = destinationField.getText().trim();
-                LocalDate departureDate = LocalDate.parse(dateField.getText().trim());
+                LocalDate departureDate = null;
+                try {
+                    departureDate = LocalDate.parse(dateField.getText().trim());
+                }
+                catch (DateTimeParseException dtpe) {
+                    throw new FlightBookingSystemException("Date must be in YYYY-MM-DD format");
+                }
+
+                // NEW: Parse additional fields
+                int capacity = Integer.parseInt(capacityField.getText().trim());
+                double basePrice = Double.parseDouble(basePriceField.getText().trim());
+                double cancellationFee = Double.parseDouble(cancellationFeeField.getText().trim());
 
                 if (flightNumber.isEmpty() || origin.isEmpty() || destination.isEmpty()) {
                     throw new IllegalArgumentException("All fields are required.");
                 }
 
-                AddFlight command = new AddFlight(flightNumber, origin, destination, departureDate);
-                command.execute(flightBookingSystem);
+                if (capacity <= 0) {
+                    throw new IllegalArgumentException("Capacity must be positive.");
+                }
+                if (basePrice < 0) {
+                    throw new IllegalArgumentException("Base price cannot be negative.");
+                }
+                if (cancellationFee < 0) {
+                    throw new IllegalArgumentException("Cancellation fee cannot be negative.");
+                }
+
+                // FIXED: Use new constructor with all 7 parameters
+                Command addFlight = new AddFlight(flightNumber, origin, destination,
+                        departureDate, basePrice, cancellationFee,capacity);
+                addFlight.execute(flightBookingSystem);
                 showSuccess("Flight added successfully!");
 
             } catch (DateTimeParseException e) {
                 showError("Invalid date format. Please use YYYY-MM-DD.");
+            } catch (NumberFormatException e) {
+                showError("Invalid number format. Please enter valid numbers for capacity, price, and fee.");
             } catch (IllegalArgumentException | FlightBookingSystemException e) {
                 showError(e.getMessage());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }

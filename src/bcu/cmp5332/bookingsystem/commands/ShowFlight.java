@@ -19,5 +19,7 @@ public class ShowFlight implements Command {
 
         // Print flight details using getDetailsLong() for comprehensive view
         System.out.println(flight.getDetailsLong());
+
+        System.out.println("\n" + flight.getPricingSummary(flightBookingSystem.getSystemDate()));
     }
 }

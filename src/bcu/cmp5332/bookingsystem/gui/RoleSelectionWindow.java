@@ -16,7 +16,7 @@ public class RoleSelectionWindow extends JFrame {
     }
 
     private void initialize() {
-        setTitle("Flight Booking System - Role Selection");
+        setTitle("Phe Airlines - Role Selection");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -25,6 +25,14 @@ public class RoleSelectionWindow extends JFrame {
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
 
+        mainPanel.setBackground(new Color(240, 248, 255));
+
+        // --- Add Logo
+        ImageIcon logoIcon = new ImageIcon(getClass().getResource("/images/logo2.png"));
+        JLabel logoLabel = new JLabel(logoIcon);
+        logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(logoLabel);
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         // Title
         JLabel titleLabel = new JLabel("Flight Booking System");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
@@ -49,12 +57,13 @@ public class RoleSelectionWindow extends JFrame {
         adminButton.setFont(new Font("Arial", Font.BOLD, 14));
         adminButton.setPreferredSize(new Dimension(150, 60));
         adminButton.addActionListener(e -> openAdminPanel());
+        adminButton.setBackground(new Color(211, 211, 211));
 
         JButton userButton = new JButton("User");
         userButton.setFont(new Font("Arial", Font.BOLD, 14));
         userButton.setPreferredSize(new Dimension(150, 60));
         userButton.addActionListener(e -> openUserPanel());
-
+        userButton.setBackground(new Color( 205, 205, 205));
         buttonPanel.add(adminButton);
         buttonPanel.add(userButton);
 
