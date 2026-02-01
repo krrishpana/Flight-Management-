@@ -50,8 +50,7 @@ public class AuthenticationService {
 
         // Create new customer
         Customer customer = new Customer(nextCustomerId, name, phone, email, age,
-                username, password, foodPreference,
-                hasChildUnderTwo, UserRole.CUSTOMER);
+                username, password, UserRole.CUSTOMER);
 
         // Add to system
         fbs.addCustomer(customer);
@@ -78,8 +77,7 @@ public class AuthenticationService {
             // Create default admin
             int adminId = fbs.getCustomers().size() + 1;
             Customer admin = new Customer(adminId, "System Admin", "00000000000",
-                    "admin@gmail.com", 30, "admin", "admin123",
-                    "Non-Veg", false, UserRole.ADMIN);
+                    "admin@gmail.com", 30, "admin", "admin123", UserRole.ADMIN);
             fbs.addCustomer(admin);
             System.out.println("Default admin created: username='admin', password='admin123'");
         }

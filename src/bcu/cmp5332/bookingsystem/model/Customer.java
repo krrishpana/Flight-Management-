@@ -14,8 +14,6 @@ public class Customer {
     private int age;
     private String username;
     private String password;
-    private String foodPreference;
-    private boolean hasChildUnderTwo;
     private UserRole role;
     private final List<Booking> bookings = new ArrayList<>();
 
@@ -25,15 +23,12 @@ public class Customer {
                 18,                   // age
                 "user" + id,         // username
                 "password123",       // password
-                "Non-Veg",           // foodPreference
-                false,               // hasChildUnderTwo
                 UserRole.CUSTOMER);  // role
     }
 
     // Constructor
     public Customer(int id, String name, String phone, String email, int age,
-                    String username, String password, String foodPreference,
-                    boolean hasChildUnderTwo, UserRole role) throws FlightBookingSystemException {
+                    String username, String password, UserRole role) throws FlightBookingSystemException {
         if (id <= 0) {
             throw new FlightBookingSystemException("Customer ID must be positive.");
         }
@@ -44,7 +39,7 @@ public class Customer {
             throw new FlightBookingSystemException("Customer phone cannot be empty.");
         }
 
-        validateRegistrationData(email, age, username, password, foodPreference);
+        validateRegistrationData(email, age, username, password);
 
         this.id = id;
         this.name = name;
@@ -53,14 +48,12 @@ public class Customer {
         this.age = age;
         this.username = username;
         this.password = password; // For now store plain, we'll hash later
-        this.foodPreference = foodPreference;
-        this.hasChildUnderTwo = hasChildUnderTwo;
         this.role = role;
     }
 
 //    Validation method
     private void validateRegistrationData(String email, int age, String username,
-                                          String password, String foodPreference)
+                                          String password)
             throws FlightBookingSystemException {
 
         // Email validation
@@ -95,13 +88,6 @@ public class Customer {
             throw new FlightBookingSystemException("Password must be at least 6 characters long.");
         }
 
-        // Food preference validation
-        if (foodPreference == null || foodPreference.isBlank()) {
-            throw new FlightBookingSystemException("Food preference cannot be empty.");
-        }
-        if (!foodPreference.equalsIgnoreCase("Veg") && !foodPreference.equalsIgnoreCase("Non-Veg")) {
-            throw new FlightBookingSystemException("Food preference must be either 'Veg' or 'Non-Veg'.");
-        }
     }
     // Getters and Setters
     public int getId() {
@@ -173,28 +159,6 @@ public class Customer {
         this.password = password; // We'll add hashing later
     }
 
-    public String getFoodPreference() {
-        return foodPreference;
-    }
-
-    public void setFoodPreference(String foodPreference) throws FlightBookingSystemException {
-        if (foodPreference == null || foodPreference.isBlank()) {
-            throw new FlightBookingSystemException("Food preference cannot be empty.");
-        }
-        if (!foodPreference.equalsIgnoreCase("Veg") && !foodPreference.equalsIgnoreCase("Non-Veg")) {
-            throw new FlightBookingSystemException("Food preference must be either 'Veg' or 'Non-Veg'.");
-        }
-        this.foodPreference = foodPreference;
-    }
-
-    public boolean hasChildUnderTwo() {
-        return hasChildUnderTwo;
-    }
-
-    public void setHasChildUnderTwo(boolean hasChildUnderTwo) {
-        this.hasChildUnderTwo = hasChildUnderTwo;
-    }
-
     public UserRole getRole() {
         return role;
     }
@@ -220,8 +184,6 @@ public class Customer {
         sb.append("\nEmail: ").append(email);
         sb.append("\nAge: ").append(age);
         sb.append("\nUsername: ").append(username);
-        sb.append("\nFood Preference: ").append(foodPreference);
-        sb.append("\nChild under 2: ").append(hasChildUnderTwo ? "Yes" : "No");
         sb.append("\nRole: ").append(role);
         sb.append("\n\nBookings:\n");
 

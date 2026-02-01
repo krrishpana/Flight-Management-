@@ -81,7 +81,7 @@ public class CustomerDataManager implements DataManager {
             UserRole role = UserRole.valueOf(parts[9]);
 
             Customer customer = new Customer(id, name, phone, email, age, username,
-                    password, foodPreference, hasChildUnderTwo, role);
+                    password, role);
             fbs.addCustomer(customer);
         } catch (NumberFormatException e) {
             throw new FlightBookingSystemException(
@@ -109,8 +109,6 @@ public class CustomerDataManager implements DataManager {
                                 + customer.getAge() + SEPARATOR
                                 + customer.getUsername() + SEPARATOR
                                 + customer.getPassword() + SEPARATOR
-                                + customer.getFoodPreference() + SEPARATOR
-                                + customer.hasChildUnderTwo() + SEPARATOR
                                 + customer.getRole()
                 );
             }

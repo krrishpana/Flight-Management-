@@ -13,8 +13,6 @@ public class AddCustomer implements Command {
     private final int age;
     private final String username;
     private final String password;
-    private final String foodPreference;
-    private final boolean hasChildUnderTwo;
 
     // Constructor with ALL 8 parameters
     public AddCustomer(String name, String phone, String email, int age,
@@ -26,8 +24,6 @@ public class AddCustomer implements Command {
         this.age = age;
         this.username = username;
         this.password = password;
-        this.foodPreference = foodPreference;
-        this.hasChildUnderTwo = hasChildUnderTwo;
     }
 
     @Override
@@ -36,8 +32,7 @@ public class AddCustomer implements Command {
 
         // Create customer with all 8 fields
         Customer customer = new Customer(nextCustomerId, name, phone, email, age,
-                username, password, foodPreference,
-                hasChildUnderTwo, UserRole.CUSTOMER);
+                username, password, UserRole.CUSTOMER);
 
         flightBookingSystem.addCustomer(customer);
 

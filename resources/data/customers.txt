@@ -3,3 +3,5 @@
 3::Krrishpana Karmacharya::9861456710::default@gmail.com::18::user3::password123::Non-Veg::false::CUSTOMER
 4::Hyandri Maharjan::9841985769::default@gmail.com::18::user4::password123::Non-Veg::false::CUSTOMER
 5::Kasmita Koirala::9876654621::kasmita12@gmail.com::20::kasmita::123456::Non-veg::false::CUSTOMER
+6::System Admin::00000000000::admin@gmail.com::30::admin::admin123::Non-Veg::false::ADMIN
+7::bibash magar::9855489112::bibs@gmail.com::19::bibash::bibash::Non-Veg::false::CUSTOMER
