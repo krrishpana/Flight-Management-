@@ -30,13 +30,8 @@ public class UserMainWindow extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        // Create user panels
-        UserFlightPanel flightPanel = new UserFlightPanel(flightBookingSystem);
-        UserBookingPanel bookingPanel = new UserBookingPanel(flightBookingSystem);
 
         // Add panels to card layout
-        mainPanel.add(flightPanel, "FLIGHTS");
-        mainPanel.add(bookingPanel, "BOOKINGS");
 
         add(mainPanel, BorderLayout.CENTER);
 

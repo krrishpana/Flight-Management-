@@ -26,7 +26,9 @@ public class CancellationDataManager {
                             booking.getPaidPrice() + "::" +
                             booking.getCancellationFee() + "::" +
                             cancellationTime + "::" +
-                            undoDeadline
+                            undoDeadline + "::" +
+                            booking.hasInfant() + "::" +
+                            booking.isVegetarian()
             );
         }
     }
@@ -59,10 +61,12 @@ public class CancellationDataManager {
                     double cancellationFee = Double.parseDouble(parts[4]);
                     LocalDateTime cancellationTime = LocalDateTime.parse(parts[5]);
                     LocalDateTime undoDeadline = LocalDateTime.parse(parts[6]);
+                    boolean hadInfant = Boolean.parseBoolean(parts[7]);
+                    boolean wasVegetarian = Boolean.parseBoolean(parts[8]);
 
                     return new CancelledBooking(
                             customerId, flightId, bookingDate, paidPrice,
-                            cancellationFee, cancellationTime, undoDeadline
+                            cancellationFee, cancellationTime, undoDeadline,hadInfant, wasVegetarian
                     );
                 }
             }

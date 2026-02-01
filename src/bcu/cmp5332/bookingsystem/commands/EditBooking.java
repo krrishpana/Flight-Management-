@@ -41,10 +41,13 @@ public class EditBooking implements Command {
         }
 
         // Find the first booking (for simplicity, we edit the first booking)
-        // In a real system, we'd ask which booking to edit
         Booking oldBooking = customer.getBookings().get(0);
         Flight oldFlight = oldBooking.getFlight();
         double cancellationFee = oldBooking.getCancellationFee();
+
+        // Get passenger details from old booking to preserve them
+        boolean oldHasInfant = oldBooking.hasInfant();
+        boolean oldIsVegetarian = oldBooking.isVegetarian();
 
         // Prompt for new booking date
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -58,19 +61,44 @@ public class EditBooking implements Command {
             throw new FlightBookingSystemException("Invalid date format. Please use YYYY-MM-DD");
         }
 
+        // Ask if passenger wants to update infant/vegetarian info
+        System.out.println("\nCurrent passenger details:");
+        System.out.println("Infant: " + (oldHasInfant ? "Yes" : "No"));
+        System.out.println("Vegetarian: " + (oldIsVegetarian ? "Yes" : "No"));
+
+        System.out.print("\nKeep same infant status? (y/n): ");
+        String infantResponse = reader.readLine().trim().toLowerCase();
+        boolean newHasInfant = oldHasInfant;
+        if (infantResponse.equals("n") || infantResponse.equals("no")) {
+            System.out.print("Travelling with infant under 2? (y/n): ");
+            String newInfantResponse = reader.readLine().trim().toLowerCase();
+            newHasInfant = newInfantResponse.equals("y") || newInfantResponse.equals("yes");
+        }
+
+        System.out.print("Keep same vegetarian status? (y/n): ");
+        String vegResponse = reader.readLine().trim().toLowerCase();
+        boolean newIsVegetarian = oldIsVegetarian;
+        if (vegResponse.equals("n") || vegResponse.equals("no")) {
+            System.out.print("Vegetarian meal? (y/n): ");
+            String newVegResponse = reader.readLine().trim().toLowerCase();
+            newIsVegetarian = newVegResponse.equals("y") || newVegResponse.equals("yes");
+        }
+
         // Cancel old booking (charges cancellation fee)
         customer.cancelBookingForFlight(oldFlight);
         oldFlight.removePassenger(customer);
 
-        System.out.println("Old booking cancelled. Cancellation fee: £" + String.format("%.2f", cancellationFee));
+        System.out.println("\nOld booking cancelled. Cancellation fee: £" + String.format("%.2f", cancellationFee));
 
         // Calculate price for new flight
         double newPrice = newFlight.getCurrentPrice(flightBookingSystem.getSystemDate());
         double newCancellationFee = newFlight.getCancellationFee();
 
-        // Create new booking with all parameters
+        // Create new booking with ALL parameters (7 parameters)
         Booking newBooking = new Booking(customer, newFlight, newBookingDate,
-                newPrice, newCancellationFee);
+                newPrice, newCancellationFee,
+                newHasInfant, newIsVegetarian);  // Added infant and vegetarian parameters
+
         customer.addBooking(newBooking);
         newFlight.addPassenger(customer);
 
@@ -78,6 +106,8 @@ public class EditBooking implements Command {
         System.out.println("Changed from flight #" + oldFlight.getId() + " to flight #" + newFlightId);
         System.out.println("New booking price: £" + String.format("%.2f", newPrice));
         System.out.println("New cancellation fee: £" + String.format("%.2f", newCancellationFee));
-        System.out.println("Total cost: £" + String.format("%.2f", (cancellationFee + newPrice)));
+        System.out.println("Infant: " + (newHasInfant ? "Yes" : "No"));
+        System.out.println("Vegetarian: " + (newIsVegetarian ? "Yes" : "No"));
+        System.out.println("Total additional cost: £" + String.format("%.2f", (cancellationFee + newPrice)));
     }
 }

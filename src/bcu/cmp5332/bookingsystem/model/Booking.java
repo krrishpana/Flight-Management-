@@ -9,14 +9,18 @@ public class Booking {
     private LocalDate bookingDate;
     private double paidPrice;
     private double cancellationFee;
+    private boolean hasInfant;
+    private boolean isVegetarian;
 
     public Booking(Customer customer, Flight flight, LocalDate bookingDate,
-                   double paidPrice, double cancellationFee) {
+                   double paidPrice, double cancellationFee, boolean hasInfant, boolean isVegetarian) {
         this.customer = customer;
         this.flight = flight;
         this.bookingDate = bookingDate;
         this.paidPrice = paidPrice;
         this.cancellationFee = cancellationFee;
+        this.hasInfant = hasInfant;
+        this.isVegetarian = isVegetarian;
         
     }
     public Customer getCustomer() {
@@ -37,6 +41,14 @@ public class Booking {
 
     public double getCancellationFee() {
         return cancellationFee;
+    }
+
+    public boolean hasInfant() {
+        return hasInfant;
+    }
+
+    public boolean isVegetarian() {
+        return isVegetarian;
     }
 
     // -------- Setters --------
@@ -61,10 +73,19 @@ public class Booking {
         this.cancellationFee = cancellationFee;
     }
 
+    public void setHasInfant(boolean hasInfant) {
+        this.hasInfant = hasInfant;
+    }
+
+    public void setIsVegetarian(boolean isVegetarian) {
+        this.isVegetarian = isVegetarian;
+    }
+
     public String getDetails() {
-        return String.format("Booking for Flight #%d (%s to %s on %s) - Price Paid: £%.2f, Cancellation Fee: £%.2f",
-                flight.getId(), flight.getOrigin(), flight.getDestination(),
-                flight.getDepartureDate(), paidPrice, cancellationFee);
+        return String.format("Booking for Flight #%d - Price: £%.2f | Infant: %s | Vegetarian: %s",
+                flight.getId(), paidPrice,
+                hasInfant ? "Yes" : "No",
+                isVegetarian ? "Yes" : "No");
     }
 }
 

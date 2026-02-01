@@ -60,7 +60,7 @@ public class UndoCancelBooking implements Command {
             // Create new booking with original details
             Booking restoredBooking = new Booking(
                     customer, flight, cancelled.getBookingDate(),
-                    cancelled.getPaidPrice(), cancelled.getCancellationFee()
+                    cancelled.getPaidPrice(), cancelled.getCancellationFee(),cancelled.hadInfant(), cancelled.wasVegetarian()
             );
 
             // Add booking to customer

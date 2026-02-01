@@ -6,6 +6,7 @@ import bcu.cmp5332.bookingsystem.model.FlightBookingSystem;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class BookingManagementPanel extends CommandBasePanel {
 
@@ -68,6 +69,8 @@ public class BookingManagementPanel extends CommandBasePanel {
                 showError("Invalid IDs. Please enter numbers.");
             } catch (FlightBookingSystemException e) {
                 showError(e.getMessage());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }

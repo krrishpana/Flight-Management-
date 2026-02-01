@@ -11,10 +11,12 @@ public class CancelledBooking {
     private final double cancellationFee;
     private final LocalDateTime cancellationTime;
     private final LocalDateTime undoDeadline;
+    private final boolean hadInfant;
+    private final boolean wasVegetarian;
 
     public CancelledBooking(int customerId, int flightId, LocalDate bookingDate,
                             double paidPrice, double cancellationFee,
-                            LocalDateTime cancellationTime, LocalDateTime undoDeadline) {
+                            LocalDateTime cancellationTime, LocalDateTime undoDeadline, boolean hadInfant, boolean wasVegetarian) {
         this.customerId = customerId;
         this.flightId = flightId;
         this.bookingDate = bookingDate;
@@ -22,6 +24,8 @@ public class CancelledBooking {
         this.cancellationFee = cancellationFee;
         this.cancellationTime = cancellationTime;
         this.undoDeadline = undoDeadline;
+        this.hadInfant = hadInfant;
+        this.wasVegetarian = wasVegetarian;
     }
 
     // Getters
@@ -32,6 +36,8 @@ public class CancelledBooking {
     public double getCancellationFee() { return cancellationFee; }
     public LocalDateTime getCancellationTime() { return cancellationTime; }
     public LocalDateTime getUndoDeadline() { return undoDeadline; }
+    public boolean hadInfant() { return hadInfant; }
+    public boolean wasVegetarian() { return wasVegetarian; }
 
     public boolean canUndo() {
         return LocalDateTime.now().isBefore(undoDeadline);
