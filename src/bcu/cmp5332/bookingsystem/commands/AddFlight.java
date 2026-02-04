@@ -6,6 +6,10 @@ import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
 import bcu.cmp5332.bookingsystem.model.Flight;
 import bcu.cmp5332.bookingsystem.model.FlightBookingSystem;
 
+/**
+ * Command to add a new flight to the system.
+ * Validates flight details and ensures unique flight number/date combination.
+ */
 public class AddFlight implements  Command {
 
     private final String flightNumber;
@@ -17,6 +21,16 @@ public class AddFlight implements  Command {
 
     private final int capacity;
 
+    /**
+     * Creates an add flight command with all flight details.
+     * @param flightNumber unique flight identifier (e.g., BA123)
+     * @param origin departure location
+     * @param destination arrival location
+     * @param departureDate date of departure (cannot be in past)
+     * @param basePrice standard ticket price
+     * @param cancellationFee fee for cancelling booking
+     * @param capacity maximum number of passengers
+     */
     public AddFlight(String flightNumber, String origin, String destination, LocalDate departureDate, double basePrice, double cancellationFee, int capacity) {
         this.flightNumber = flightNumber;
         this.origin = origin;
@@ -26,7 +40,13 @@ public class AddFlight implements  Command {
         this.cancellationFee = cancellationFee;
         this.capacity = capacity;
     }
-    
+
+    /**
+     * Executes flight creation.
+     * Generates new ID and adds flight to system.
+     * @param flightBookingSystem the system to operate on
+     * @throws FlightBookingSystemException if flight creation fails
+     */
     @Override
     public void execute(FlightBookingSystem flightBookingSystem) throws FlightBookingSystemException {
         int maxId = 0;

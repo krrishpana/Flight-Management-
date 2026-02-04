@@ -14,10 +14,20 @@ import bcu.cmp5332.bookingsystem.model.Customer;
 import bcu.cmp5332.bookingsystem.model.Flight;
 import bcu.cmp5332.bookingsystem.model.FlightBookingSystem;
 
+/**
+ * Manages loading and saving booking data to/from text files.
+ * Handles the bookings.txt file with 7 fields per booking record.
+ */
 public class BookingDataManager implements DataManager {
 
     public final String RESOURCE = "./resources/data/bookings.txt";
 
+    /**
+     * Loads booking data from file and links customers with flights.
+     * @param fbs the flight booking system to populate
+     * @throws IOException if the file cannot be read
+     * @throws FlightBookingSystemException if data format is invalid
+     */
     @Override
     public void loadData(FlightBookingSystem fbs) throws IOException, FlightBookingSystemException {
         File file = new File(RESOURCE);

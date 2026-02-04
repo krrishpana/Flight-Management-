@@ -7,11 +7,21 @@ import java.time.LocalDateTime;
 import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
 import bcu.cmp5332.bookingsystem.model.*;
 
+/**
+ * Manages cancelled booking records for the undo cancellation feature.
+ * Handles logging, finding, and removing cancellation records from file.
+ */
 public class CancellationDataManager {
 
     private static final String RESOURCE = "./resources/data/cancellations.txt";
     private static final int UNDO_HOURS = 24;
 
+    /**
+     * Logs a cancelled booking to file for potential undo.
+     * @param booking the booking that was cancelled
+     * @param cancellationTime when the cancellation occurred
+     * @throws IOException if the file cannot be written
+     */
     public void logCancellation(Booking booking, LocalDateTime cancellationTime) throws IOException {
         File file = new File(RESOURCE);
         file.getParentFile().mkdirs();
@@ -33,6 +43,14 @@ public class CancellationDataManager {
         }
     }
 
+    /**
+     * Finds a specific cancellation record by customer and flight IDs.
+     * @param customerId ID of the customer who cancelled
+     * @param flightId ID of the cancelled flight
+     * @return CancelledBooking object if found, null otherwise
+     * @throws IOException if the file cannot be read
+     * @throws FlightBookingSystemException if data format is invalid
+     */
     public CancelledBooking findCancellation(int customerId, int flightId) throws IOException, FlightBookingSystemException {
         File file = new File(RESOURCE);
         if (!file.exists()) {
@@ -48,7 +66,7 @@ public class CancellationDataManager {
                 if (line.isBlank()) continue;
 
                 String[] parts = line.split("::");
-                if (parts.length != 7) {
+                if (parts.length != 9) {
                     continue; // Skip malformed lines
                 }
 
@@ -74,6 +92,13 @@ public class CancellationDataManager {
         return null;
     }
 
+    /**
+     * Removes a cancellation record when undo is performed.
+     * @param customerId ID of the customer who is undoing cancellation
+     * @param flightId ID of the flight being restored
+     * @return true if cancellation was found and removed, false otherwise
+     * @throws IOException if file operations fail
+     */
     public boolean removeCancellation(int customerId, int flightId) throws IOException {
         File inputFile = new File(RESOURCE);
         File tempFile = new File(RESOURCE + ".tmp");

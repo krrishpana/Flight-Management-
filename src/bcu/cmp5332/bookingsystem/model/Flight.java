@@ -10,6 +10,10 @@ import java.util.Set;
 
 import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
 
+/**
+ * Represents a flight in the booking system.
+ * Stores flight details, manages passengers, and calculates dynamic pricing.
+ */
 public class Flight {
 
     private int id;
@@ -23,6 +27,18 @@ public class Flight {
 
     private final Set<Customer> passengers;
 
+    /**
+     * Creates a new flight with all details.
+     * @param id unique flight identifier
+     * @param flightNumber flight number (e.g., BA123)
+     * @param origin departure airport/city
+     * @param destination arrival airport/city
+     * @param departureDate date of departure (cannot be in past)
+     * @param capacity maximum number of passengers
+     * @param basePrice standard ticket price
+     * @param cancellationFee fee charged for cancellations
+     * @throws IllegalArgumentException if any parameter is invalid
+     */
     public Flight(int id, String flightNumber, String origin, String destination,
                   LocalDate departureDate, int capacity, double basePrice, double cancellationFee) {
 
@@ -96,12 +112,20 @@ public class Flight {
         return new ArrayList<>(passengers);
     }
 
+    /**
+     * Provides a short summary of flight details.
+     * @return formatted string with flight ID, number, route, and date
+     */
     public String getDetailsShort() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/YYYY");
         return "Flight #" + id + " - " + flightNumber + " - " + origin + " to "
                 + destination + " on " + departureDate.format(dtf);
     }
 
+    /**
+     * Provides detailed flight information including passenger list.
+     * @return formatted string with all flight details
+     */
     public String getDetailsLong() {
         StringBuilder sb = new StringBuilder();
 
@@ -129,6 +153,11 @@ public class Flight {
         return sb.toString();
     }
 
+    /**
+     * Adds a passenger to this flight.
+     * @param passenger the customer to add
+     * @throws FlightBookingSystemException if flight is full or passenger already booked
+     */
     public void addPassenger(Customer passenger) throws FlightBookingSystemException {
         if (isFull()) {
             throw new FlightBookingSystemException(
@@ -148,6 +177,11 @@ public class Flight {
         passengers.add(passenger);
     }
 
+    /**
+     * Removes a passenger from this flight.
+     * @param passenger the customer to remove
+     * @throws FlightBookingSystemException if passenger not found on flight
+     */
     public void removePassenger(Customer passenger) throws FlightBookingSystemException {
         Customer toRemove = null;
         for (Customer existing : passengers) {
@@ -165,10 +199,6 @@ public class Flight {
         passengers.remove(toRemove);
     }
 
-    /**
-     * Gets the maximum capacity (number of seats) for this flight.
-     * @return the flight capacity
-     */
     public int getCapacity() {
         return capacity;
     }
@@ -185,10 +215,6 @@ public class Flight {
         this.capacity = capacity;
     }
 
-    /**
-     * Gets the base price for a ticket on this flight.
-     * @return the base price
-     */
     public double getBasePrice() {
         return basePrice;
     }
@@ -205,10 +231,6 @@ public class Flight {
         this.basePrice = basePrice;
     }
 
-    /**
-     * Gets the cancellation fee for this flight.
-     * @return the cancellation fee
-     */
     public double getCancellationFee() {
         return cancellationFee;
     }
@@ -229,10 +251,6 @@ public class Flight {
         return passengers.size() >= capacity;
     }
 
-    /**
-     * Gets the number of remaining seats.
-     * @return the number of available seats
-     */
     public int getRemainingSeats() {
         return capacity - passengers.size();
     }
@@ -293,7 +311,6 @@ public class Flight {
         int remainingSeats = getRemainingSeats();
         double finalPrice = getCurrentPrice(currentDate);
 
-        // Only show adjustments if they apply
         boolean hasTimeAdjustment = daysUntilDeparture < 30;
         boolean hasAvailabilityAdjustment = remainingSeats <= 50;
 

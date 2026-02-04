@@ -8,9 +8,21 @@ import java.time.format.DateTimeParseException;
 
 import bcu.cmp5332.bookingsystem.commands.*;
 
+/**
+ * Parses user input commands and creates corresponding command objects.
+ * Handles interactive input for commands that require additional information.
+ */
 public class CommandParser {
-    
-    public static Command parse(String line) throws IOException, FlightBookingSystemException {
+
+    /**
+     * Parses a command line and creates the appropriate command object.
+     * @param line the command line entered by user
+     * @param authService authentication service for login/logout commands
+     * @return Command object corresponding to the input
+     * @throws IOException if there's an error reading additional input
+     * @throws FlightBookingSystemException if command is invalid or parsing fails
+     */
+    public static Command parse(String line, AuthenticationService authService) throws IOException, FlightBookingSystemException {
         try {
             String[] parts = line.split(" ", 3);
             String cmd = parts[0];
@@ -76,13 +88,46 @@ public class CommandParser {
                         basePrice, cancellationFee, capacity);
             } else if (cmd.equals("addcustomer")) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
                 System.out.print("Name: ");
                 String name = reader.readLine();
+
                 System.out.print("Phone: ");
                 String phone = reader.readLine();
 
-                return new AddCustomer(name, phone);
-            } else if (cmd.equals("loadgui")) {
+                System.out.print("Email (must be @gmail.com): ");
+                String email = reader.readLine();
+
+                System.out.print("Age (must be 18+): ");
+                int age = Integer.parseInt(reader.readLine());
+
+                System.out.print("Username: ");
+                String username = reader.readLine();
+
+                System.out.print("Password (min 6 chars): ");
+                String password = reader.readLine();
+
+
+                return new AddCustomer(name, phone, email, age, username, password
+                );
+            }
+            else if (cmd.equals("login")) {
+                {
+                    BufferedReader readerLogin = new BufferedReader(new InputStreamReader(System.in));
+
+                    System.out.print("Username: ");
+                    String loginUsername = readerLogin.readLine();
+
+                    System.out.print("Password: ");
+                    String loginPassword = readerLogin.readLine();
+
+                    return new LoginCommand(loginUsername, loginPassword, authService);
+                }
+            }
+            else if (cmd.equals("logout")) {
+                return new LogoutCommand(authService);
+            }
+            else if (cmd.equals("loadgui")) {
                 return new LoadGUI();
             } else if (parts.length == 1) {
                 if (line.equals("listflights")) {
@@ -110,8 +155,8 @@ public class CommandParser {
                     
                 } else if (cmd.equals("cancelbooking")) {
                     return new CancelBooking(id1, id2);
-                } else if (cmd.equals("undocancel")) {  // ADD THIS LINE
-                    return new UndoCancelBooking(id1, id2);  // ADD THIS LINE
+                } else if (cmd.equals("undocancel")) {
+                    return new UndoCancelBooking(id1, id2);
                 }
             }
         } catch (NumberFormatException ex) {
@@ -120,7 +165,15 @@ public class CommandParser {
 
         throw new FlightBookingSystemException("Invalid command.");
     }
-    
+
+    /**
+     * Attempts to parse a date with multiple retries for invalid input.
+     * @param br BufferedReader for user input
+     * @param attempts number of attempts allowed
+     * @return parsed LocalDate object
+     * @throws IOException if reading input fails
+     * @throws FlightBookingSystemException if all attempts fail
+     */
     private static LocalDate parseDateWithAttempts(BufferedReader br, int attempts) throws IOException, FlightBookingSystemException {
         if (attempts < 1) {
             throw new IllegalArgumentException("Number of attempts should be higher that 0");
@@ -134,7 +187,7 @@ public class CommandParser {
                 if (departureDate.isBefore(systemDate)) {
                     System.out.println("Departure date cannot be in the past. " +
                             attempts + " attempts remaining...");
-                    continue; // Don't count this as a failed attempt for format
+                    continue;
                 }
                 return departureDate;
             } catch (DateTimeParseException dtpe) {
@@ -144,7 +197,14 @@ public class CommandParser {
         
         throw new FlightBookingSystemException("Incorrect departure date provided. Cannot create flight.");
     }
-    
+
+    /**
+     * Attempts to parse a date with 3 retries for invalid input.
+     * @param br BufferedReader for user input
+     * @return parsed LocalDate object
+     * @throws IOException if reading input fails
+     * @throws FlightBookingSystemException if all attempts fail
+     */
     private static LocalDate parseDateWithAttempts(BufferedReader br) throws IOException, FlightBookingSystemException {
         return parseDateWithAttempts(br, 3);
     }

@@ -11,10 +11,20 @@ import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
 import bcu.cmp5332.bookingsystem.model.Flight;
 import bcu.cmp5332.bookingsystem.model.FlightBookingSystem;
 
+/**
+ * Manages loading and saving flight data to/from text files.
+ * Handles the flights.txt file format with 8 fields per line.
+ */
 public class FlightDataManager implements DataManager {
 
     private final String RESOURCE = "./resources/data/flights.txt";
 
+    /**
+     * Loads flight data from file and populates the flight booking system.
+     * @param fbs the flight booking system to populate
+     * @throws IOException if the file cannot be read
+     * @throws FlightBookingSystemException if data format is invalid
+     */
     @Override
     public void loadData(FlightBookingSystem fbs) throws IOException, FlightBookingSystemException {
         File file = new File(RESOURCE);
@@ -75,6 +85,11 @@ public class FlightDataManager implements DataManager {
         }
     }
 
+    /**
+     * Saves all flight data from the system to file.
+     * @param fbs the flight booking system containing flights to save
+     * @throws IOException if the file cannot be written
+     */
     @Override
     public void storeData(FlightBookingSystem fbs) throws IOException {
         File file = new File(RESOURCE);

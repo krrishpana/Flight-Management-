@@ -3,10 +3,17 @@ package bcu.cmp5332.bookingsystem.commands;
 import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
 import bcu.cmp5332.bookingsystem.model.FlightBookingSystem;
 
+/**
+ * Interface for all commands in the flight booking system.
+ * Defines the contract for command execution and provides help text.
+ */
 import java.io.IOException;
 
 public interface Command {
 
+    /**
+     * Help message listing all available commands and their usage.
+     */
     public static final String HELP_MESSAGE = "Commands:\n"
         + "\tlistflights                               print all flights\n"
         + "\tlistcustomers                             print all customers\n"
@@ -22,7 +29,13 @@ public interface Command {
         + "\thelp                                      prints this help message\n"
         + "\texit                                      exits the program";
 
-    
+
+    /**
+     * Executes this command on the flight booking system.
+     * @param flightBookingSystem the system to operate on
+     * @throws FlightBookingSystemException if command execution fails
+     * @throws IOException if there's an I/O error during execution
+     */
     public void execute(FlightBookingSystem flightBookingSystem) throws FlightBookingSystemException, IOException;
     
 }

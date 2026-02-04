@@ -12,16 +12,32 @@ import bcu.cmp5332.bookingsystem.model.Customer;
 import bcu.cmp5332.bookingsystem.model.Flight;
 import bcu.cmp5332.bookingsystem.model.FlightBookingSystem;
 
+/**
+ * Command to edit an existing booking (change flight or passenger details).
+ * Cancels old booking (with fee) and creates new booking.
+ */
 public class EditBooking implements Command {
 
     private final int customerId;
     private final int newFlightId;
 
+    /**
+     * Creates an edit booking command to move customer to different flight.
+     * @param customerId ID of customer whose booking to edit
+     * @param newFlightId ID of new flight to book
+     */
     public EditBooking(int customerId, int newFlightId) {
         this.customerId = customerId;
         this.newFlightId = newFlightId;
     }
 
+    /**
+     * Executes booking editing process.
+     * Collects new details, cancels old booking, creates new booking.
+     * @param flightBookingSystem the system to operate on
+     * @throws FlightBookingSystemException if editing fails
+     * @throws IOException if there's error reading user input
+     */
     @Override
     public void execute(FlightBookingSystem flightBookingSystem) throws FlightBookingSystemException, IOException {
         // Get the customer and new flight

@@ -7,18 +7,33 @@ import bcu.cmp5332.bookingsystem.model.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
+/**
+ * Command to undo a cancellation within 24-hour window.
+ * Restores booking using saved cancellation data.
+ */
 public class UndoCancelBooking implements Command {
 
     private final int customerId;
     private final int flightId;
     private final CancellationDataManager cancellationDM;
 
+    /**
+     * Creates an undo cancellation command for specific booking.
+     * @param customerId ID of customer who cancelled
+     * @param flightId ID of flight that was cancelled
+     */
     public UndoCancelBooking(int customerId, int flightId) {
         this.customerId = customerId;
         this.flightId = flightId;
         this.cancellationDM = new CancellationDataManager();
     }
 
+    /**
+     * Executes cancellation undo process.
+     * Checks if undo is possible and restores booking.
+     * @param flightBookingSystem the system to operate on
+     * @throws FlightBookingSystemException if undo fails
+     */
     @Override
     public void execute(FlightBookingSystem flightBookingSystem) throws FlightBookingSystemException {
         try {
@@ -59,8 +74,13 @@ public class UndoCancelBooking implements Command {
 
             // Create new booking with original details
             Booking restoredBooking = new Booking(
-                    customer, flight, cancelled.getBookingDate(),
-                    cancelled.getPaidPrice(), cancelled.getCancellationFee(),cancelled.hadInfant(), cancelled.wasVegetarian()
+                    customer,
+                    flight,
+                    cancelled.getBookingDate(),
+                    cancelled.getPaidPrice(),
+                    cancelled.getCancellationFee(),
+                    cancelled.hadInfant(),
+                    cancelled.wasVegetarian()
             );
 
             // Add booking to customer

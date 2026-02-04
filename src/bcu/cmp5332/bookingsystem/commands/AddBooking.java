@@ -11,16 +11,32 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 
+/**
+ * Command to create a new booking for a customer on a specific flight.
+ * Collects passenger preferences and calculates current price.
+ */
 public class AddBooking implements Command {
 
     private final int customerId;
     private final int flightId;
 
+    /**
+     * Creates an add booking command for a specific customer and flight.
+     * @param customerId ID of the customer making the booking
+     * @param flightId ID of the flight to book
+     */
     public AddBooking(int customerId, int flightId) {
         this.customerId = customerId;
         this.flightId = flightId;
     }
 
+    /**
+     * Executes the booking creation process.
+     * Checks availability, collects preferences, and creates booking.
+     * @param flightBookingSystem the system to operate on
+     * @throws FlightBookingSystemException if booking cannot be created
+     * @throws IOException if there's an error reading user input
+     */
     @Override
     public void execute(FlightBookingSystem flightBookingSystem) throws FlightBookingSystemException, IOException {
         Customer customer = flightBookingSystem.getCustomerByID(customerId);
