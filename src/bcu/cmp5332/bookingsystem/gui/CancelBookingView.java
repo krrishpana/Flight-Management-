@@ -5,42 +5,58 @@ import bcu.cmp5332.bookingsystem.model.Customer;
 import bcu.cmp5332.bookingsystem.model.Booking;
 import bcu.cmp5332.bookingsystem.model.Flight;
 import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
-import bcu.cmp5332.bookingsystem.data.CancellationDataManager;  // ADD THIS IMPORT
+import bcu.cmp5332.bookingsystem.data.CancellationDataManager;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;  // ADD THIS IMPORT
-import java.time.LocalDateTime;  // ADD THIS IMPORT
+import java.io.IOException;
+import java.time.LocalDateTime;
 
 public class CancelBookingView extends JPanel {
+
     private FlightBookingSystem fbs;
     private Customer currentUser;
-    private CancellationDataManager cancellationDM;  // ADD THIS FIELD
+    private CancellationDataManager cancellationDM;
 
     private JTextField flightIdField;
-
     private Runnable onCancelSuccess;
+    private Image backgroundImage;
 
     public CancelBookingView(FlightBookingSystem fbs, Customer currentUser) {
         this.fbs = fbs;
         this.currentUser = currentUser;
-        this.cancellationDM = new CancellationDataManager();  // INITIALIZE IT
+        this.cancellationDM = new CancellationDataManager();
+
+        try {
+            backgroundImage = new ImageIcon(getClass().getResource("/images/airplane_bg.png")).getImage();
+        } catch (Exception e) {
+            backgroundImage = null;
+        }
+
         initializeUI();
     }
 
     private void initializeUI() {
         setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
+        setOpaque(false); // important for background to show
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
+        // --- Title ---
         JLabel titleLabel = new JLabel("Cancel Booking", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        titleLabel.setForeground(new Color(44, 62, 80));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 30, 0));
+        add(titleLabel, BorderLayout.NORTH);
 
-        JPanel formPanel = new JPanel(new GridBagLayout());
-        formPanel.setBackground(Color.WHITE);
+        // --- Form Panel (transparent) ---
+        JPanel formPanel = new JPanel(new GridBagLayout()) {
+            @Override
+            public boolean isOpaque() {
+                return false;
+            }
+        };
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -48,9 +64,13 @@ public class CancelBookingView extends JPanel {
         // Flight ID
         gbc.gridx = 0;
         gbc.gridy = 0;
-        formPanel.add(new JLabel("Flight ID to Cancel:"), gbc);
+        JLabel lblFlight = new JLabel("Flight ID to Cancel:");
+        lblFlight.setForeground(Color.WHITE);
+        formPanel.add(lblFlight, gbc);
+
         gbc.gridx = 1;
         flightIdField = new JTextField(20);
+        makeFieldWhite(flightIdField);
         formPanel.add(flightIdField, gbc);
 
         // Cancel Button
@@ -59,12 +79,19 @@ public class CancelBookingView extends JPanel {
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         JButton cancelBtn = new JButton("Cancel Booking");
-        styleButton(cancelBtn, new Color(231, 76, 60));
+        styleButton(cancelBtn, new Color(231, 76, 60)); // Bright red
         cancelBtn.addActionListener(new CancelAction());
         formPanel.add(cancelBtn, gbc);
 
-        add(titleLabel, BorderLayout.NORTH);
         add(formPanel, BorderLayout.CENTER);
+    }
+
+    private void makeFieldWhite(JTextField field) {
+        field.setOpaque(true);
+        field.setBackground(Color.WHITE);
+        field.setForeground(Color.BLACK);
+        field.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+        field.setCaretColor(Color.BLACK);
     }
 
     private void styleButton(JButton button, Color color) {
@@ -74,6 +101,8 @@ public class CancelBookingView extends JPanel {
         button.setFocusPainted(false);
         button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setOpaque(true);              // <<< Make button solid
+        button.setContentAreaFilled(true);   // <<< Fill with background color
 
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
@@ -83,6 +112,14 @@ public class CancelBookingView extends JPanel {
                 button.setBackground(color);
             }
         });
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+        }
+        super.paintComponent(g);
     }
 
     private class CancelAction implements ActionListener {
@@ -105,7 +142,6 @@ public class CancelBookingView extends JPanel {
                         "Confirm Cancellation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
                 if (response == JOptionPane.YES_OPTION) {
-                    // Find the booking to cancel
                     Booking bookingToCancel = null;
                     for (Booking booking : currentUser.getBookings()) {
                         if (booking.getFlight().getId() == flightId) {
@@ -117,39 +153,25 @@ public class CancelBookingView extends JPanel {
                     if (bookingToCancel != null) {
                         Flight flight = bookingToCancel.getFlight();
 
-                        // LOG THE CANCELLATION FIRST - THIS IS THE CRITICAL MISSING STEP!
                         try {
                             cancellationDM.logCancellation(bookingToCancel, LocalDateTime.now());
-                            System.out.println("Cancellation logged for flight #" + flightId +
-                                    ", customer #" + currentUser.getId());
                         } catch (IOException ioEx) {
                             JOptionPane.showMessageDialog(CancelBookingView.this,
-                                    "Failed to log cancellation: " +
-                                            "\nCancellation aborted.", "Error", JOptionPane.ERROR_MESSAGE);
+                                    "Failed to log cancellation: \nCancellation aborted.", "Error", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
 
-                        // Now remove the booking
                         currentUser.cancelBookingForFlight(flight);
                         flight.removePassenger(currentUser);
 
                         JOptionPane.showMessageDialog(CancelBookingView.this,
-                                "✓ Booking cancelled successfully!\n\n" +
-                                        "Cancellation Details:\n" +
-                                        "• Flight: #" + flightId + " (" + flight.getFlightNumber() + ")\n" +
-                                        "• Cancellation Fee: £" + String.format("%.2f", bookingToCancel.getCancellationFee()) + "\n" +
-                                        "• Cancellation Time: " + LocalDateTime.now() + "\n" +
-                                        "• Undo Available For: 24 hours\n\n" +
-                                        "To undo cancellation:\n" +
-                                        "1. Go to 'Undo Cancellation' tab\n" +
-                                        "2. Enter Flight ID: " + flightId + "\n" +
-                                        "3. Click 'Undo Cancellation'",
+                                "✓ Booking cancelled successfully!\n" +
+                                        "Flight: #" + flightId + " (" + flight.getFlightNumber() + ")\n" +
+                                        "Cancellation Fee: Rs." + String.format("%.2f", bookingToCancel.getCancellationFee()),
                                 "Cancellation Complete", JOptionPane.INFORMATION_MESSAGE);
 
-                        // Clear form
                         flightIdField.setText("");
 
-                        // Notify parent of success
                         if (onCancelSuccess != null) {
                             onCancelSuccess.run();
                         }

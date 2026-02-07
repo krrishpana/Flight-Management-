@@ -11,20 +11,25 @@ import java.awt.event.WindowEvent;
 
 /**
  * The main entry window for the Flight Booking System.
- * Provides options to register or login as different user types.
+ * Provides options to register or login.
  */
 public class RoleSelectionWindow extends JFrame {
 
-    private FlightBookingSystem fbs;
-    private AuthenticationService authService;
+    private final FlightBookingSystem fbs;
+    private final AuthenticationService authService;
+    private Image backgroundImage;
 
-    /**
-     * Creates the role selection window as the application entry point.
-     * @param fbs the flight booking system to use
-     */
     public RoleSelectionWindow(FlightBookingSystem fbs) {
         this.fbs = fbs;
         this.authService = new AuthenticationService(fbs);
+
+        try {
+            backgroundImage = new ImageIcon(
+                    getClass().getResource("/images/bg2.png")
+            ).getImage();
+        } catch (Exception e) {
+            backgroundImage = null;
+        }
 
         initializeUI();
 
@@ -33,10 +38,10 @@ public class RoleSelectionWindow extends JFrame {
         );
         setIconImage(icon);
 
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setTitle("Phe Airlines");
         setSize(420, 420);
         setLocationRelativeTo(null);
-        setTitle("Phe Airlines");
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setVisible(true);
 
         addWindowListener(new WindowAdapter() {
@@ -48,102 +53,95 @@ public class RoleSelectionWindow extends JFrame {
     }
 
     private void initializeUI() {
-        setLayout(new BorderLayout());
 
-        JPanel headerPanel = new JPanel();
-        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
-        headerPanel.setBackground(new Color(41, 128, 185));
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 10, 15, 10));
+        // Background panel
+        JPanel mainPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (backgroundImage != null) {
+                    g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+                } else {
+                    Graphics2D g2 = (Graphics2D) g;
+                    g2.setPaint(new GradientPaint(
+                            0, 0, new Color(41, 128, 185),
+                            getWidth(), getHeight(), new Color(86, 204, 242)
+                    ));
+                    g2.fillRect(0, 0, getWidth(), getHeight());
+                }
+            }
+        };
 
-        JLabel titleLabel = new JLabel("Phe Airlines");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 26));
-        titleLabel.setForeground(Color.WHITE);
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.setLayout(new BorderLayout());
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JLabel subtitleLabel = new JLabel("Flight Booking System");
-        subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        subtitleLabel.setForeground(Color.WHITE);
-        subtitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        ImageIcon logoIcon = new ImageIcon(
-                getClass().getClassLoader().getResource("images/logo.png")
+        // ================= Buttons =================
+        JButton registerBtn = createStyledButton("Register", new Color(46, 204, 113, 200));
+        registerBtn.addActionListener(e ->
+                new RegisterWindow(fbs, authService, this)
         );
 
-        Image scaledImage = logoIcon.getImage()
-                .getScaledInstance(80, 80, Image.SCALE_SMOOTH);
-
-        JLabel logoLabel = new JLabel(new ImageIcon(scaledImage));
-        logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        headerPanel.add(titleLabel);
-        headerPanel.add(Box.createVerticalStrut(5));
-        headerPanel.add(subtitleLabel);
-        headerPanel.add(Box.createVerticalStrut(10));
-        headerPanel.add(logoLabel);
-
-        add(headerPanel, BorderLayout.NORTH);
-
-        JPanel mainPanel = new JPanel(new GridBagLayout());
-        mainPanel.setBackground(new Color(236, 240, 241));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-
-        JButton registerBtn = new JButton("Register");
-        styleButton(registerBtn, new Color(46, 204, 113));
-        registerBtn.setPreferredSize(new Dimension(150, 40));
-
-        JButton loginBtn = new JButton("Login");
-        styleButton(loginBtn, new Color(52, 152, 219));
-        loginBtn.setPreferredSize(new Dimension(150, 40));
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        mainPanel.add(registerBtn, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        mainPanel.add(loginBtn, gbc);
-
-        add(mainPanel, BorderLayout.CENTER);
-
-        JPanel footerPanel = new JPanel();
-        footerPanel.setBackground(new Color(52, 73, 94));
-
-        JLabel footerLabel = new JLabel("© 2026  Phe Airlines");
-        footerLabel.setForeground(Color.WHITE);
-        footerPanel.add(footerLabel);
-
-        add(footerPanel, BorderLayout.SOUTH);
-
-        registerBtn.addActionListener(e ->
-                new RegisterWindow(fbs, authService, RoleSelectionWindow.this));
-
+        JButton loginBtn = createStyledButton("Login", new Color(52, 152, 219, 200));
         loginBtn.addActionListener(e ->
-                new LoginWindow(fbs, authService, RoleSelectionWindow.this));
+                new LoginWindow(fbs, authService, this)
+        );
+
+        JPanel buttonPanel = new JPanel(new GridLayout(2, 1, 10, 10));
+        buttonPanel.setOpaque(false);
+        buttonPanel.add(registerBtn);
+        buttonPanel.add(loginBtn);
+
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setOpaque(false);
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 40, 30, 40));
+        bottomPanel.add(buttonPanel, BorderLayout.CENTER);
+
+        // ================= Footer =================
+        JLabel footerLabel = new JLabel("© 2026 Flight Booking System", SwingConstants.CENTER);
+        footerLabel.setFont(new Font("Arial", Font.PLAIN, 10));
+        footerLabel.setForeground(new Color(255, 255, 255, 150));
+
+        bottomPanel.add(footerLabel, BorderLayout.SOUTH);
+
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+        setContentPane(mainPanel);
     }
 
-    private void styleButton(JButton button, Color color) {
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFont(new Font("Arial", Font.BOLD, 14));
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    private JButton createStyledButton(String text, Color bgColor) {
+        JButton button = new JButton(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(color.darker());
+                g2.setColor(bgColor);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
+
+                g2.setColor(Color.WHITE);
+                g2.setStroke(new BasicStroke(2));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);
+
+                g2.dispose();
+                super.paintComponent(g);
             }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(color);
-            }
-        });
+        };
+
+        button.setPreferredSize(new Dimension(1, 50));
+        button.setFont(new Font("Arial", Font.BOLD, 16));
+        button.setForeground(Color.WHITE);
+        button.setContentAreaFilled(false);
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        return button;
     }
 
     private void handleWindowClosing() {
         int option = JOptionPane.showConfirmDialog(
                 this,
-                "Are you sure you want to exit?\nAll data will be saved.",
+                "Are you sure you want to exit the application?\nAll data will be saved automatically.",
                 "Confirm Exit",
                 JOptionPane.YES_NO_OPTION
         );
@@ -157,10 +155,11 @@ public class RoleSelectionWindow extends JFrame {
                 JOptionPane.showMessageDialog(
                         this,
                         "Error saving data: " + e.getMessage(),
-                        "Error",
+                        "Save Error",
                         JOptionPane.ERROR_MESSAGE
                 );
             }
         }
     }
 }
+

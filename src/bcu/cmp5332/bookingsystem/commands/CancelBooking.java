@@ -72,7 +72,7 @@ public class CancelBooking implements Command {
             System.out.println("=".repeat(50));
             System.out.println("Customer: " + customer.getName());
             System.out.println("Flight: " + flight.getFlightNumber());
-            System.out.println("Cancellation Fee Charged: £" +
+            System.out.println("Cancellation Fee Charged: Rs." +
                     String.format("%.2f", bookingToCancel.getCancellationFee()));
             System.out.println("\nYou have 24 hours to undo this cancellation.");
             System.out.println("Command to undo: undocancel " + customerId + " " + flightId);

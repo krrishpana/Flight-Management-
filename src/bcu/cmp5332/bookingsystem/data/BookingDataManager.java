@@ -45,10 +45,9 @@ public class BookingDataManager implements DataManager {
 
                 String[] parts = line.split("::");
 
-                // NEW: Expect exactly 7 fields (no backward compatibility)
-                if (parts.length != 7) {
+                if (parts.length != 8) {
                     throw new FlightBookingSystemException(
-                            "Invalid booking data format. Expected 7 fields, found " +
+                            "Invalid booking data format. Expected 8 fields, found " +
                                     parts.length + ": " + line
                     );
                 }
@@ -60,6 +59,7 @@ public class BookingDataManager implements DataManager {
                 double cancellationFee = Double.parseDouble(parts[4]);
                 boolean hasInfant = Boolean.parseBoolean(parts[5]);
                 boolean isVegetarian = Boolean.parseBoolean(parts[6]);
+                String seat = parts[7];
 
                 Customer customer = fbs.getCustomerByID(customerId);
                 Flight flight = fbs.getFlightByID(flightId);
@@ -67,7 +67,7 @@ public class BookingDataManager implements DataManager {
                 // Use new constructor with all 7 parameters
                 Booking booking = new Booking(customer, flight, bookingDate,
                         paidPrice, cancellationFee,
-                        hasInfant, isVegetarian);
+                        hasInfant, isVegetarian, seat);
 
                 customer.addBooking(booking);
                 flight.addPassenger(customer);
@@ -92,7 +92,8 @@ public class BookingDataManager implements DataManager {
                                     booking.getPaidPrice() + "::" +
                                     booking.getCancellationFee() + "::" +
                                     booking.hasInfant() + "::" +
-                                    booking.isVegetarian()
+                                    booking.isVegetarian() + "::" +
+                                    booking.getSeatNumber()
                     );
                 }
             }

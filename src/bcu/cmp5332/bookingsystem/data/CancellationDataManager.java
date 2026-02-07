@@ -38,7 +38,8 @@ public class CancellationDataManager {
                             cancellationTime + "::" +
                             undoDeadline + "::" +
                             booking.hasInfant() + "::" +
-                            booking.isVegetarian()
+                            booking.isVegetarian() + "::" +
+                            booking.getSeatNumber()
             );
         }
     }
@@ -66,7 +67,7 @@ public class CancellationDataManager {
                 if (line.isBlank()) continue;
 
                 String[] parts = line.split("::");
-                if (parts.length != 9) {
+                if (parts.length != 10) {
                     continue; // Skip malformed lines
                 }
 
@@ -81,10 +82,12 @@ public class CancellationDataManager {
                     LocalDateTime undoDeadline = LocalDateTime.parse(parts[6]);
                     boolean hadInfant = Boolean.parseBoolean(parts[7]);
                     boolean wasVegetarian = Boolean.parseBoolean(parts[8]);
+                    String seatNumber = parts[9];
 
                     return new CancelledBooking(
                             customerId, flightId, bookingDate, paidPrice,
-                            cancellationFee, cancellationTime, undoDeadline,hadInfant, wasVegetarian
+                            cancellationFee, cancellationTime, undoDeadline,
+                            hadInfant, wasVegetarian,seatNumber
                     );
                 }
             }

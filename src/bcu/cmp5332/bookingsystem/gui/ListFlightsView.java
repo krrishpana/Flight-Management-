@@ -15,10 +15,18 @@ public class ListFlightsView extends JPanel {
 
     private JTable flightsTable;
     private DefaultTableModel tableModel;
-
+    private Image backgroundImage;
     public ListFlightsView(FlightBookingSystem fbs) {
         this.fbs = fbs;
         initializeUI();
+        try {
+            backgroundImage = new ImageIcon(
+                    getClass().getResource("/images/airplane_bg.png")
+            ).getImage();
+        } catch (Exception e) {
+            backgroundImage = null;
+        }
+
         refresh();
     }
 
@@ -77,10 +85,18 @@ public class ListFlightsView extends JPanel {
                     flight.getDepartureDate(),
                     flight.getCapacity(),
                     flight.getRemainingSeats(),
-                    String.format("£%.2f", flight.getBasePrice()),
-                    String.format("£%.2f", flight.getCurrentPrice(fbs.getSystemDate()))
+                    String.format("Rs.%.2f", flight.getBasePrice()),
+                    String.format("Rs.%.2f", flight.getCurrentPrice(fbs.getSystemDate()))
             };
             tableModel.addRow(row);
+        }
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
         }
     }
 

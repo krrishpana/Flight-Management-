@@ -40,11 +40,7 @@ public class AddBooking implements Command {
     @Override
     public void execute(FlightBookingSystem flightBookingSystem) throws FlightBookingSystemException, IOException {
         Customer customer = flightBookingSystem.getCustomerByID(customerId);
-        Flight flight = flightBookingSystem.getFlightByID(flightId);
-
-        if (flight.isFull()) {
-            throw new FlightBookingSystemException("Flight #" + flightId + " is fully booked.");
-        }
+        Flight flight = flightBookingSystem.getAvailableFlightByID(flightId);
 
         LocalDate systemDate = flightBookingSystem.getSystemDate();
         if (flight.getDepartureDate().isBefore(systemDate)) {
@@ -69,15 +65,37 @@ public class AddBooking implements Command {
         // Get simplified pricing summary
         String pricingSummary = flight.getPricingSummary(flightBookingSystem.getSystemDate());
 
-        Booking booking = new Booking(customer, flight, flightBookingSystem.getSystemDate(),
-                currentPrice, flightCancellationFee, hasInfant, isVegetarian);
+        flight.displaySeatMap();
 
+        String seat;
+        while (true) {
+            System.out.print("Choose seat (e.g., 12A): ");
+            seat = reader.readLine().toUpperCase().trim();
+
+            if (!flight.isValidSeat(seat)) {
+                System.out.println("Invalid seat format.");
+                continue;
+            }
+            if (!flight.isSeatAvailable(seat)) {
+                System.out.println("Seat already taken.");
+                continue;
+            }
+            break;
+        }
+
+        flight.bookSeat(seat);
+
+
+        Booking booking = new Booking(customer, flight,
+                flightBookingSystem.getSystemDate(),
+                currentPrice, flightCancellationFee,
+                hasInfant, isVegetarian, seat);
         customer.addBooking(booking);
         flight.addPassenger(customer);
 
         // Show minimal pricing info
         System.out.println("\n" + pricingSummary);
-        System.out.println("Cancellation Fee: £" + String.format("%.2f", flightCancellationFee));
+        System.out.println("Cancellation Fee: Rs." + String.format("%.2f", flightCancellationFee));
         System.out.println("Infant: " + (hasInfant ? "Yes" : "No"));
         System.out.println("Vegetarian: " + (isVegetarian ? "Yes" : "No"));
         System.out.println("\n Booking confirmed for customer #" + customerId);

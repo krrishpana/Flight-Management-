@@ -15,7 +15,7 @@ public class Booking {
     private double cancellationFee;
     private boolean hasInfant;
     private boolean isVegetarian;
-
+    private String seatNumber;
     /**
      * Creates a new booking with all booking details.
      * @param customer the customer making the booking
@@ -25,9 +25,10 @@ public class Booking {
      * @param cancellationFee fee charged if booking is cancelled
      * @param hasInfant whether booking includes an infant
      * @param isVegetarian whether vegetarian meal is requested
+     * @param seatNumber seatNumber to be requested
      */
     public Booking(Customer customer, Flight flight, LocalDate bookingDate,
-                   double paidPrice, double cancellationFee, boolean hasInfant, boolean isVegetarian) {
+                   double paidPrice, double cancellationFee, boolean hasInfant, boolean isVegetarian, String seatNumber) {
         this.customer = customer;
         this.flight = flight;
         this.bookingDate = bookingDate;
@@ -35,7 +36,11 @@ public class Booking {
         this.cancellationFee = cancellationFee;
         this.hasInfant = hasInfant;
         this.isVegetarian = isVegetarian;
-        
+        this.seatNumber = seatNumber;
+    }
+
+    public String getSeatNumber() {
+        return seatNumber;
     }
     public Customer getCustomer() {
         return customer;
@@ -100,10 +105,12 @@ public class Booking {
      * @return string with flight ID, price, and passenger preferences
      */
     public String getDetails() {
-        return String.format("Booking for Flight #%d - Price: £%.2f | Infant: %s | Vegetarian: %s",
-                flight.getId(), paidPrice,
+        return String.format(
+                "Flight #%d | Seat: %s | Price: Rs. %.2f | Infant: %s | Vegetarian: %s",
+                flight.getId(), seatNumber, paidPrice,
                 hasInfant ? "Yes" : "No",
-                isVegetarian ? "Yes" : "No");
+                isVegetarian ? "Yes" : "No"
+        );
     }
 }
 

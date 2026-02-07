@@ -1,5 +1,2 @@
-1::Kasmita Koirala::9876654621::kasmita12@gmail.com::20::kasmita::123456::CUSTOMER
-2::System Admin::00000000000::admin@gmail.com::30::admin::admin123::ADMIN
-3::Hyandri Maharjan::9841985769::handry@gmail.com::19::handry::handry123::CUSTOMER
-4::Krrishpana Karmacharya::9861484309::krrishpana@gmail.com::20::krrishpu::krrishpu::CUSTOMER
-5::Sagar Dhakal::9864339210::sagar@gmail.com::43::sagar::sagar123::CUSTOMER
+1::System Admin::00000000000::admin@gmail.com::30::admin::admin123::ADMIN::false
+2::Krrishpana Karmacharya::9861484309::krrishpu@gmail.com::20::krrishpu::krrishpu::CUSTOMER::false

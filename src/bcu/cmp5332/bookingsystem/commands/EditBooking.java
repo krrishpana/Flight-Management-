@@ -110,20 +110,47 @@ public class EditBooking implements Command {
         double newPrice = newFlight.getCurrentPrice(flightBookingSystem.getSystemDate());
         double newCancellationFee = newFlight.getCancellationFee();
 
-        // Create new booking with ALL parameters (7 parameters)
-        Booking newBooking = new Booking(customer, newFlight, newBookingDate,
-                newPrice, newCancellationFee,
-                newHasInfant, newIsVegetarian);  // Added infant and vegetarian parameters
+        newFlight.displaySeatMap();
 
+        String seat;
+        while (true) {
+            System.out.print("Choose new seat (e.g., 12A): ");
+            seat = reader.readLine().toUpperCase().trim();
+
+            if (!newFlight.isValidSeat(seat)) {
+                System.out.println("Invalid seat format.");
+                continue;
+            }
+            if (!newFlight.isSeatAvailable(seat)) {
+                System.out.println("Seat already taken.");
+                continue;
+            }
+            break;
+        }
+
+        newFlight.bookSeat(seat);
+
+// ---- CREATE NEW BOOKING ----
+        Booking newBooking = new Booking(
+                customer,
+                newFlight,
+                newBookingDate,
+                newPrice,
+                newCancellationFee,
+                newHasInfant,
+                newIsVegetarian,
+                seat
+        );
         customer.addBooking(newBooking);
         newFlight.addPassenger(customer);
 
         System.out.println("\nBooking updated successfully!");
         System.out.println("Changed from flight #" + oldFlight.getId() + " to flight #" + newFlightId);
-        System.out.println("New booking price: £" + String.format("%.2f", newPrice));
-        System.out.println("New cancellation fee: £" + String.format("%.2f", newCancellationFee));
+        System.out.println("New booking price: Rs." + String.format("%.2f", newPrice));
+        System.out.println("New cancellation fee: Rs." + String.format("%.2f", newCancellationFee));
+        System.out.println("Seat: " + seat);
         System.out.println("Infant: " + (newHasInfant ? "Yes" : "No"));
         System.out.println("Vegetarian: " + (newIsVegetarian ? "Yes" : "No"));
-        System.out.println("Total additional cost: £" + String.format("%.2f", (cancellationFee + newPrice)));
+        System.out.println("Total additional cost: Rs." + String.format("%.2f", (cancellationFee + newPrice)));
     }
 }

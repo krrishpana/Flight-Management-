@@ -67,7 +67,7 @@ public class AddFlight implements  Command {
                 departureDate, capacity, basePrice, cancellationFee);
         flightBookingSystem.addFlight(flight);
         System.out.println("Flight #" + flight.getId() + " added.");
-        System.out.println("Capacity: " + capacity + ", Base Price: £" + basePrice +
-                ", Cancellation Fee: £" + cancellationFee);
+        System.out.println("Capacity: " + capacity + ", Base Price: Rs." + basePrice +
+                ", Cancellation Fee: Rs." + cancellationFee);
     }
 }

@@ -15,17 +15,24 @@ public class MyBookingsView extends JPanel {
 
     private JTable bookingsTable;
     private DefaultTableModel tableModel;
-
+    private Image backgroundImage;
     public MyBookingsView(FlightBookingSystem fbs, Customer currentUser) {
         this.fbs = fbs;
         this.currentUser = currentUser;
         initializeUI();
+        try {
+            backgroundImage = new ImageIcon(
+                    getClass().getResource("/images/airplane_bg.png")
+            ).getImage();
+        } catch (Exception e) {
+            backgroundImage = null;
+        }
         refresh();
     }
 
     private void initializeUI() {
         setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
+        setOpaque(false);
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         JLabel titleLabel = new JLabel("My Bookings", SwingConstants.LEFT);
@@ -35,7 +42,7 @@ public class MyBookingsView extends JPanel {
         // Create bookings table
         String[] columns = {"Booking ID", "Flight Number", "Origin", "Destination",
                 "Departure Date", "Booking Date", "Price Paid",
-                "Cancellation Fee", "Infant", "Vegetarian"};
+                "Cancellation Fee", "Infant", "Vegetarian","Seat ID"};
 
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
@@ -43,6 +50,7 @@ public class MyBookingsView extends JPanel {
                 return false;
             }
         };
+
 
         bookingsTable = new JTable(tableModel);
         bookingsTable.setRowHeight(30);
@@ -57,22 +65,30 @@ public class MyBookingsView extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
     }
 
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+        }
+    }
     public void refresh() {
         tableModel.setRowCount(0);
 
         for (Booking booking : currentUser.getBookings()) {
             Flight flight = booking.getFlight();
             Object[] row = {
-                    flight.getId() + "-" + currentUser.getId(), // Simple booking ID
+                    flight.getId() , // Simple booking ID
                     flight.getFlightNumber(),
                     flight.getOrigin(),
                     flight.getDestination(),
                     flight.getDepartureDate(),
                     booking.getBookingDate(),
-                    String.format("£%.2f", booking.getPaidPrice()),
-                    String.format("£%.2f", booking.getCancellationFee()),
+                    String.format("Rs.%.2f", booking.getPaidPrice()),
+                    String.format("Rs.%.2f", booking.getCancellationFee()),
                     booking.hasInfant() ? "Yes" : "No",
-                    booking.isVegetarian() ? "Yes" : "No"
+                    booking.isVegetarian() ? "Yes" : "No",
+                    booking.getSeatNumber()
             };
             tableModel.addRow(row);
         }

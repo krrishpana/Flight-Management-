@@ -17,9 +17,18 @@ public class DashboardViewAdmin extends JPanel {
     private JLabel availableSeatsLabel;
     private JLabel todayRevenueLabel;
     private JLabel systemDateLabel;
+    private Image backgroundImage;
 
     public DashboardViewAdmin(FlightBookingSystem fbs) {
         this.fbs = fbs;
+
+        try {
+            backgroundImage = new ImageIcon(getClass().getResource("/images/airplane_bg.png")).getImage();
+        } catch (Exception e) {
+            backgroundImage = null;
+        }
+
+        setOpaque(false); // important
         initializeUI();
         refresh();
     }
@@ -72,7 +81,7 @@ public class DashboardViewAdmin extends JPanel {
         totalFlightsLabel.setText(String.valueOf(fbs.getFlights().size()));
         totalCustomersLabel.setText(String.valueOf(fbs.getCustomers().size()));
         totalBookingsLabel.setText(String.valueOf(countAllBookings()));
-        todayRevenueLabel.setText("£" + String.format("%.2f", calculateTodayRevenue()));
+        todayRevenueLabel.setText("Rs." + String.format("%.2f", calculateTodayRevenue()));
     }
 
     private int countAllBookings() {

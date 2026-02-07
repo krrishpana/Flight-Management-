@@ -17,7 +17,7 @@ public class CancelledBooking {
     private final LocalDateTime undoDeadline;
     private final boolean hadInfant;
     private final boolean wasVegetarian;
-
+    private String seatNumber;
     /**
      * Creates a record of a cancelled booking.
      * @param customerId ID of customer who cancelled
@@ -32,7 +32,8 @@ public class CancelledBooking {
      */
     public CancelledBooking(int customerId, int flightId, LocalDate bookingDate,
                             double paidPrice, double cancellationFee,
-                            LocalDateTime cancellationTime, LocalDateTime undoDeadline, boolean hadInfant, boolean wasVegetarian) {
+                            LocalDateTime cancellationTime, LocalDateTime undoDeadline,
+                            boolean hadInfant, boolean wasVegetarian,String seatNumber) {
         this.customerId = customerId;
         this.flightId = flightId;
         this.bookingDate = bookingDate;
@@ -42,6 +43,7 @@ public class CancelledBooking {
         this.undoDeadline = undoDeadline;
         this.hadInfant = hadInfant;
         this.wasVegetarian = wasVegetarian;
+        this.seatNumber = seatNumber;
     }
 
     // Getters
@@ -54,7 +56,7 @@ public class CancelledBooking {
     public LocalDateTime getUndoDeadline() { return undoDeadline; }
     public boolean hadInfant() { return hadInfant; }
     public boolean wasVegetarian() { return wasVegetarian; }
-
+    public String getSeatNumber() {return seatNumber;}
     /**
      * Checks if cancellation can still be undone.
      * @return true if current time is before undo deadline
@@ -68,6 +70,7 @@ public class CancelledBooking {
      * @return remaining time in hours and minutes, or "Expired"
      */
     public String getTimeRemaining() {
+        if (!canUndo()) return "Expired";
         if (!canUndo()) return "Expired";
 
         java.time.Duration remaining = java.time.Duration.between(LocalDateTime.now(), undoDeadline);

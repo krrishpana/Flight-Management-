@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
 
@@ -61,13 +62,76 @@ public class FlightBookingSystem {
         return systemDate;
     }
 
+    /**
+     * Gets only active, non-deleted flights.
+     * @return list of flights available for booking
+     */
     public List<Flight> getFlights() {
-        List<Flight> out = new ArrayList<>(flights.values());
-        return Collections.unmodifiableList(out);
+        return flights.values().stream()
+                .filter(flight -> !flight.isDeleted() && !flight.hasDeparted(systemDate))
+                .collect(Collectors.toList());
     }
 
     /**
-     * Finds a flight by its unique ID.
+     * Gets flights for admin view (includes departed but not deleted flights).
+     * @return all non-deleted flights
+     */
+    public List<Flight> getFlightsForAdmin() {
+        return flights.values().stream()
+                .filter(flight -> !flight.isDeleted())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets a flight by ID and validates it's available for booking by a specific customer.
+     * @param id flight ID to search for
+     * @param customer the customer trying to book (can be null for general availability check)
+     * @return the flight with matching ID
+     * @throws FlightBookingSystemException if flight not available for booking
+     */
+    public Flight getAvailableFlightByID(int id, Customer customer) throws FlightBookingSystemException {
+        Flight flight = getFlightByID(id);
+
+        // Check deletion status
+        if (flight.isDeleted()) {
+            throw new FlightBookingSystemException("Flight #" + id + " has been deleted.");
+        }
+
+        // Check departure date
+        if (flight.hasDeparted(systemDate)) {
+            throw new FlightBookingSystemException("Flight #" + id + " has already departed on " +
+                    flight.getDepartureDate());
+        }
+
+        // Check capacity
+        if (flight.isFull()) {
+            throw new FlightBookingSystemException("Flight #" + id + " is fully booked.");
+        }
+
+        // Check duplicate booking if customer is provided
+        if (customer != null) {
+            for (Booking booking : customer.getBookings()) {
+                if (booking.getFlight().getId() == id) {
+                    throw new FlightBookingSystemException(
+                            "You already have a booking for flight #" + id);
+                }
+            }
+        }
+
+        return flight;
+    }
+
+    /**
+     * Gets a flight by ID for general availability (no customer check).
+     * @param id flight ID to search for
+     * @return the flight with matching ID
+     * @throws FlightBookingSystemException if flight not available
+     */
+    public Flight getAvailableFlightByID(int id) throws FlightBookingSystemException {
+        return getAvailableFlightByID(id, null);
+    }
+    /**
+     * Finds a flight by ID regardless of deletion status.
      * @param id flight ID to search for
      * @return the flight with matching ID
      * @throws FlightBookingSystemException if flight not found
@@ -80,14 +144,14 @@ public class FlightBookingSystem {
     }
 
     /**
-     * Gets an unmodifiable list of all customers.
-     * @return list of customers
+     * Gets only non-deleted customers.
+     * @return list of active customers
      */
     public List<Customer> getCustomers() {
-        List<Customer> out = new ArrayList<>(customers.values());
-        return Collections.unmodifiableList(out);
+        return customers.values().stream()
+                .filter(customer -> !customer.isDeleted())
+                .collect(Collectors.toList());
     }
-
     /**
      * Finds a customer by their unique ID.
      * @param id customer ID to search for
@@ -121,6 +185,7 @@ public class FlightBookingSystem {
         flights.put(flight.getId(), flight);
     }
 
+
     /**
      * Adds a new customer to the system.
      * @param customer the customer to add
@@ -132,4 +197,100 @@ public class FlightBookingSystem {
         }
         customers.put(customer.getId(), customer);
     }
+
+    /**
+     * Gets all customers including deleted ones.
+     * @return list of all customers regardless of deletion status
+     */
+    public List<Customer> getAllCustomers() {
+        List<Customer> out = new ArrayList<>(customers.values());
+        return Collections.unmodifiableList(out);
+    }
+
+    /**
+     * Gets all flights including deleted ones.
+     * @return list of all flights regardless of deletion status
+     */
+    public List<Flight> getAllFlights() {
+        List<Flight> out = new ArrayList<>(flights.values());
+        return Collections.unmodifiableList(out);
+    }
+
+    /**
+     * Gets flights including departed ones (for admin/history).
+     * @return all non-deleted flights including departed ones
+     */
+    public List<Flight> getFlightsWithHistory() {
+        return flights.values().stream()
+                .filter(flight -> !flight.isDeleted())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Soft-deletes a flight (marks as deleted).
+     * @param flightId ID of flight to delete
+     * @throws FlightBookingSystemException if flight not found or has active bookings
+     */
+    public void deleteFlight(int flightId) throws FlightBookingSystemException {
+        Flight flight = getFlightByID(flightId);
+
+        if (flight.isDeleted()) {
+            throw new FlightBookingSystemException("Flight #" + flightId + " is already deleted.");
+        }
+
+        // Check if flight has active bookings
+        if (!flight.getPassengers().isEmpty()) {
+            throw new FlightBookingSystemException(
+                    "Cannot delete flight #" + flightId + " because it has active bookings.");
+        }
+
+        flight.softDelete();
+    }
+
+    /**
+     * Restores a soft-deleted flight.
+     * @param id ID of flight to restore
+     * @throws FlightBookingSystemException if flight not found
+     */
+    public void restoreFlight(int id) throws FlightBookingSystemException {
+        Flight flight = getFlightByID(id);
+        flight.restore();
+    }
+
+    /**
+     * Soft-deletes a customer (marks as deleted).
+     * @param customerId ID of customer to delete
+     * @throws FlightBookingSystemException if customer not found or has active bookings
+     */
+    public void deleteCustomer(int customerId) throws FlightBookingSystemException {
+        Customer customer = getCustomerByID(customerId);
+
+        if (customer.isDeleted()) {
+            throw new FlightBookingSystemException("Customer #" + customerId + " is already deleted.");
+        }
+
+        // Check if customer has active bookings
+        if (!customer.getBookings().isEmpty()) {
+            throw new FlightBookingSystemException(
+                    "Cannot delete customer #" + customerId + " because they have active bookings.");
+        }
+
+        customer.softDelete();
+    }
+
+    /**
+     * Restores a soft-deleted customer.
+     * @param customerId ID of customer to restore
+     * @throws FlightBookingSystemException if customer not found
+     */
+    public void restoreCustomer(int customerId) throws FlightBookingSystemException {
+        Customer customer = getCustomerByID(customerId);
+
+        if (!customer.isDeleted()) {
+            throw new FlightBookingSystemException("Customer #" + customerId + " is not deleted.");
+        }
+
+        customer.restore();
+    }
+
 }

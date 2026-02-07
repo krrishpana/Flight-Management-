@@ -13,7 +13,7 @@ import bcu.cmp5332.bookingsystem.model.FlightBookingSystem;
 
 /**
  * Manages loading and saving flight data to/from text files.
- * Handles the flights.txt file format with 8 fields per line.
+ * Handles the flights.txt file with 9 fields per line (including deleted flag).
  */
 public class FlightDataManager implements DataManager {
 
@@ -21,6 +21,7 @@ public class FlightDataManager implements DataManager {
 
     /**
      * Loads flight data from file and populates the flight booking system.
+     * Expects exactly 9 fields per line including the deleted flag.
      * @param fbs the flight booking system to populate
      * @throws IOException if the file cannot be read
      * @throws FlightBookingSystemException if data format is invalid
@@ -50,14 +51,15 @@ public class FlightDataManager implements DataManager {
                 String[] properties = line.split(SEPARATOR, -1);
 
                 try {
-                    // New format: Expect exactly 8 fields (id, flightNumber, origin, destination, departureDate, capacity, basePrice, cancellationFee)
-                    if (properties.length < 8) {
+                    // NEW FORMAT: Expect exactly 9 fields
+                    if (properties.length != 9) {
                         throw new FlightBookingSystemException(
                                 "Invalid flight data format on line " + line_idx +
-                                        ". Expected 8 fields, found " + properties.length);
+                                        ". Expected 9 fields, found " + properties.length +
+                                        ". Please delete old data file and restart.");
                     }
 
-                    // Parse all required fields
+                    // Parse all 9 required fields
                     int id = Integer.parseInt(properties[0]);
                     String flightNumber = properties[1];
                     String origin = properties[2];
@@ -66,19 +68,23 @@ public class FlightDataManager implements DataManager {
                     int capacity = Integer.parseInt(properties[5]);
                     double basePrice = Double.parseDouble(properties[6]);
                     double cancellationFee = Double.parseDouble(properties[7]);
+                    boolean deleted = Boolean.parseBoolean(properties[8]);
 
-                    // Create Flight using new constructor
+                    // Create Flight using constructor
                     Flight flight = new Flight(id, flightNumber, origin, destination,
                             departureDate, capacity, basePrice, cancellationFee);
+
+                    // Set deletion status
+                    flight.setDeleted(deleted);
 
                     fbs.addFlight(flight);
 
                 } catch (NumberFormatException ex) {
                     throw new FlightBookingSystemException(
                             "Unable to parse number on line " + line_idx + ": " + ex.getMessage());
-                } catch (ArrayIndexOutOfBoundsException ex) {
+                } catch (IllegalArgumentException ex) {
                     throw new FlightBookingSystemException(
-                            "Missing required flight fields on line " + line_idx);
+                            "Invalid data on line " + line_idx + ": " + ex.getMessage());
                 }
                 line_idx++;
             }
@@ -87,6 +93,7 @@ public class FlightDataManager implements DataManager {
 
     /**
      * Saves all flight data from the system to file.
+     * Writes 9 fields per line including the deleted flag.
      * @param fbs the flight booking system containing flights to save
      * @throws IOException if the file cannot be written
      */
@@ -96,8 +103,8 @@ public class FlightDataManager implements DataManager {
         file.getParentFile().mkdirs();
 
         try (PrintWriter out = new PrintWriter(new FileWriter(file))) {
-            for (Flight flight : fbs.getFlights()) {
-                // Write all 8 fields
+            for (Flight flight : fbs.getAllFlights()) {  // Use getAllFlights() to include deleted ones
+                // Write all 9 fields
                 out.print(flight.getId() + SEPARATOR);
                 out.print(flight.getFlightNumber() + SEPARATOR);
                 out.print(flight.getOrigin() + SEPARATOR);
@@ -106,6 +113,7 @@ public class FlightDataManager implements DataManager {
                 out.print(flight.getCapacity() + SEPARATOR);
                 out.print(flight.getBasePrice() + SEPARATOR);
                 out.print(flight.getCancellationFee() + SEPARATOR);
+                out.print(flight.isDeleted());  // 9th field: deletion status
                 out.println();
             }
         }

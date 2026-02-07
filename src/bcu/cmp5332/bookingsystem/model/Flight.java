@@ -7,9 +7,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.*;
 
 import bcu.cmp5332.bookingsystem.main.FlightBookingSystemException;
-
+import bcu.cmp5332.bookingsystem.gui.SeatSelectionDialog;
 /**
  * Represents a flight in the booking system.
  * Stores flight details, manages passengers, and calculates dynamic pricing.
@@ -24,8 +25,12 @@ public class Flight {
     private int capacity;
     private double basePrice;
     private double cancellationFee;
-
+    private boolean deleted = false;
+    private boolean active = true;
     private final Set<Customer> passengers;
+    private final Set<String> bookedSeats = new HashSet<>();
+
+    private final Map<String, Customer> seatMap = new HashMap<>();
 
     /**
      * Creates a new flight with all details.
@@ -39,11 +44,16 @@ public class Flight {
      * @param cancellationFee fee charged for cancellations
      * @throws IllegalArgumentException if any parameter is invalid
      */
+
+    private static final char[] SEAT_LETTERS = {'A','B','C','D','E','F'};
+    private int getMaxRows() {
+        return (int) Math.ceil((double) capacity / SEAT_LETTERS.length);
+    }
     public Flight(int id, String flightNumber, String origin, String destination,
                   LocalDate departureDate, int capacity, double basePrice, double cancellationFee) {
 
         if (departureDate.isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("Departure date cannot be in the past: " + departureDate);
+            System.err.println("Warning: Flight #" + id + " has past departure date: " + departureDate);
         }
         if (capacity <= 0) {
             throw new IllegalArgumentException("Capacity must be positive: " + capacity);
@@ -67,49 +77,72 @@ public class Flight {
 
         passengers = new HashSet<>();
     }
-
-    public int getId() {
-        return id;
+    /**
+     * Gets the flight's deletion status.
+     * @return true if flight is marked as deleted
+     */
+    public boolean isDeleted() {return deleted;}
+    /**
+     * Sets the flight's deletion status.
+     * @param deleted true to mark as deleted, false to restore
+     */
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    /**
+     * Checks if flight has departed relative to a given date.
+     * @param currentDate the date to compare against
+     * @return true if flight departure date is before or equal to currentDate
+     */
+    public boolean hasDeparted(LocalDate currentDate) {
+        return departureDate.isBefore(currentDate) || departureDate.isEqual(currentDate);
+    }
+    /**
+     * Soft-deletes the flight (marks as deleted without removing).
+     */
+    public void softDelete() {
+        this.deleted = true;
+    }
+    /**
+     * Restores a soft-deleted flight.
+     */
+    public void restore() {
+        this.deleted = false;
     }
 
-    public String getFlightNumber() {
-        return flightNumber;
+    /**
+     * Checks if flight is active for booking.
+     * @param currentDate the current system date
+     * @return true if flight is not deleted, not departed, and not full
+     */
+    public boolean isAvailableForBooking(LocalDate currentDate) {
+        return !deleted && !hasDeparted(currentDate) && !isFull();
+    }
+    public int getId() {return id;}
+    public void setId(int id) {this.id = id;}
+    public String getFlightNumber() {return flightNumber;}
+    public void setFlightNumber(String flightNumber) {this.flightNumber = flightNumber;}
+    public String getOrigin() {return origin;}
+    public void setOrigin(String origin) {this.origin = origin;}
+    public String getDestination() {return destination;}
+    public void setDestination(String destination) {this.destination = destination;}
+    public LocalDate getDepartureDate() {return departureDate;}
+    public void setDepartureDate(LocalDate departureDate) {this.departureDate = departureDate;}
+    public List<Customer> getPassengers() {return new ArrayList<>(passengers);}
+
+    /**
+     * Frees a seat on the flight, making it available for other passengers.
+     * @param seat the seat label (e.g., "12A") to be released
+     */
+    public void freeSeat(String seat) {
+        // Assuming you have a Map or Array representing your seats
+        // This logic should be the opposite of your bookSeat(seat) method
+        if (seat != null) {bookedSeats.remove(seat.toUpperCase().trim());}
     }
 
-    public void setFlightNumber(String flightNumber) {
-        this.flightNumber = flightNumber;
-    }
-
-    public String getOrigin() {
-        return origin;
-    }
-
-    public void setOrigin(String origin) {
-        this.origin = origin;
-    }
-
-    public String getDestination() {
-        return destination;
-    }
-
-    public void setDestination(String destination) {
-        this.destination = destination;
-    }
-
-    public LocalDate getDepartureDate() {
-        return departureDate;
-    }
-
-    public void setDepartureDate(LocalDate departureDate) {
-        this.departureDate = departureDate;
-    }
-
-    public List<Customer> getPassengers() {
-        return new ArrayList<>(passengers);
+    public int getSeatRows() {
+        return getMaxRows();
     }
 
     /**
@@ -135,8 +168,8 @@ public class Flight {
         sb.append(" Destination: ").append(destination);
         sb.append(" Departure Date: ").append(departureDate);
         sb.append("\nCapacity: ").append(capacity);
-        sb.append(", Base Price: £").append(String.format("%.2f", basePrice));
-        sb.append(", Cancellation Fee: £").append(String.format("%.2f", cancellationFee));
+        sb.append(", Base Price: ").append(String.format("%.2f", basePrice));
+        sb.append(", Cancellation Fee: ").append(String.format("%.2f", cancellationFee));
         sb.append(", Remaining Seats: ").append(getRemainingSeats());
         sb.append("\n\nPassengers:\n");
 
@@ -315,7 +348,7 @@ public class Flight {
         boolean hasAvailabilityAdjustment = remainingSeats <= 50;
 
         summary.append(" PRICE SUMMARY\n");
-        summary.append(String.format("Base Price: £%.2f\n", basePrice));
+        summary.append(String.format("Base Price: %.2f\n", basePrice));
 
         if (hasTimeAdjustment || hasAvailabilityAdjustment) {
             summary.append("Adjustments:\n");
@@ -335,8 +368,60 @@ public class Flight {
             summary.append("(Standard pricing)\n");
         }
 
-        summary.append(String.format("Final Price: £%.2f", finalPrice));
+        summary.append(String.format("Final Price: Rs%.2f", finalPrice));
 
         return summary.toString();
+    }
+
+    public boolean isValidSeat(String seat) {
+        if (seat == null || seat.length() < 2) return false;
+
+        try {
+            int row = Integer.parseInt(seat.substring(0, seat.length() - 1));
+            char letter = seat.charAt(seat.length() - 1);
+
+            // Use dynamic calculation instead of hardcoded ROWS
+            if (row < 1 || row > getMaxRows()) return false;
+
+            for (char c : SEAT_LETTERS) {
+                if (c == letter) return true;
+            }
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return false;
+    }
+
+    public boolean isSeatAvailable(String seat) {
+        return isValidSeat(seat) && !bookedSeats.contains(seat);
+    }
+    public void bookSeat(String seat) throws FlightBookingSystemException {
+        if (!isValidSeat(seat)) {
+            throw new FlightBookingSystemException("Invalid seat number.");
+        }
+        if (!isSeatAvailable(seat)) {
+            throw new FlightBookingSystemException("Seat already booked.");
+        }
+        bookedSeats.add(seat);
+    }
+
+    public void displaySeatMap() {
+        System.out.println("\n SEAT MAP (X = Booked)");
+
+        int maxRows = getMaxRows();
+
+        for (int row = 1; row <= maxRows; row++) {
+            System.out.printf("%2d ", row);
+
+            for (char seat : SEAT_LETTERS) {
+                String seatId = row + String.valueOf(seat);
+                if (bookedSeats.contains(seatId)) {
+                    System.out.print(" X ");
+                } else {
+                    System.out.print(" " + seat + " ");
+                }
+            }
+            System.out.println();
+        }
     }
 }

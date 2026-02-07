@@ -19,6 +19,7 @@ public class Customer {
     private String username;
     private String password;
     private UserRole role;
+    private boolean deleted = false;
     private final List<Booking> bookings = new ArrayList<>();
 
     /**
@@ -256,8 +257,8 @@ public class Customer {
             sb.append(booking.getBookingDate());
             sb.append(" for ");
             sb.append(booking.getFlight().getDetailsShort());
-            sb.append(" - Price Paid: £").append(String.format("%.2f", booking.getPaidPrice()));
-            sb.append(", Cancellation Fee: £").append(String.format("%.2f", booking.getCancellationFee()));
+            sb.append(" - Price Paid: Rs.").append(String.format("%.2f", booking.getPaidPrice()));
+            sb.append(", Cancellation Fee: Rs.").append(String.format("%.2f", booking.getCancellationFee()));
             sb.append(" | Infant: ").append(booking.hasInfant() ? "Yes" : "No");
             sb.append(" | Vegetarian: ").append(booking.isVegetarian() ? "Yes" : "No");
             sb.append("\n");
@@ -318,5 +319,43 @@ public class Customer {
         }
 
         bookings.remove(bookingToRemove);
+    }
+
+    /**
+     * Gets the customer's deletion status.
+     * @return true if customer is marked as deleted
+     */
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    /**
+     * Sets the customer's deletion status.
+     * @param deleted true to mark as deleted, false to restore
+     */
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    /**
+     * Soft-deletes the customer (marks as deleted without removing).
+     */
+    public void softDelete() {
+        this.deleted = true;
+        // Optionally, invalidate active sessions
+        this.username = "DELETED_" + this.username;
+    }
+
+    public void restore() {
+        this.deleted = false;
+        // Remove the "DELETED_timestamp_" prefix
+        if (this.username.startsWith("DELETED_")) {
+            // Find the third underscore (DELETED_timestamp_originalUsername)
+            int firstUnderscore = username.indexOf('_');
+            int secondUnderscore = username.indexOf('_', firstUnderscore + 1);
+            if (secondUnderscore != -1) {
+                this.username = username.substring(secondUnderscore + 1);
+            }
+        }
     }
 }

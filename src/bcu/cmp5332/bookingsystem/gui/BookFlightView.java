@@ -20,16 +20,25 @@ public class BookFlightView extends JPanel {
     private JCheckBox vegetarianCheckBox;
 
     private Runnable onBookingSuccess;
-
+    private Image backgroundImage;
     public BookFlightView(FlightBookingSystem fbs, Customer currentUser) {
         this.fbs = fbs;
         this.currentUser = currentUser;
+
+        try {
+            backgroundImage = new ImageIcon(
+                    getClass().getResource("/images/airplane_bg.png")
+            ).getImage();
+        } catch (Exception e) {
+            backgroundImage = null;
+        }
+
         initializeUI();
     }
 
     private void initializeUI() {
         setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
+        setOpaque(false);
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         JLabel titleLabel = new JLabel("Book a Flight", SwingConstants.CENTER);
@@ -37,7 +46,7 @@ public class BookFlightView extends JPanel {
         titleLabel.setForeground(new Color(44, 62, 80));
 
         JPanel formPanel = new JPanel(new GridBagLayout());
-        formPanel.setBackground(Color.WHITE);
+        formPanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -72,7 +81,7 @@ public class BookFlightView extends JPanel {
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         JButton bookBtn = new JButton("Book Flight");
-        styleButton(bookBtn, new Color(46, 204, 113));
+        styleButton(bookBtn, new Color(46, 204, 113)); // Bright green
         bookBtn.addActionListener(new BookAction());
         formPanel.add(bookBtn, gbc);
 
@@ -98,45 +107,75 @@ public class BookFlightView extends JPanel {
         });
     }
 
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+        }
+    }
+
     private class BookAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                int flightId = Integer.parseInt(flightIdField.getText());
-                Flight flight = fbs.getFlightByID(flightId);
+                int flightId = Integer.parseInt(flightIdField.getText().trim());
 
-                // Check if flight is full
-                if (flight.isFull()) {
+                Flight flight = fbs.getAvailableFlightByID(flightId, currentUser);
+
+                SeatSelectionDialog dialog = new SeatSelectionDialog(
+                        (JFrame) SwingUtilities.getWindowAncestor(BookFlightView.this),
+                        flight
+                );
+
+                dialog.setVisible(true);
+                String seat = dialog.getSelectedSeat();
+
+                if (seat == null) return; // user closed dialog
+
+                if (seat.trim().isEmpty()) {
+                    return; // User clicked cancel or left it blank
+                }
+                seat = seat.toUpperCase().trim();
+
+                // Validate seat existence and availability
+                if (!flight.isValidSeat(seat)) {
                     JOptionPane.showMessageDialog(BookFlightView.this,
-                            "Flight #" + flightId + " is fully booked!", "Error", JOptionPane.ERROR_MESSAGE);
+                            "Invalid seat format.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (!flight.isSeatAvailable(seat)) {
+                    JOptionPane.showMessageDialog(BookFlightView.this,
+                            "Seat " + seat + " is already taken.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // Check if customer already booked this flight
-                for (Booking booking : currentUser.getBookings()) {
-                    if (booking.getFlight().getId() == flightId) {
-                        JOptionPane.showMessageDialog(BookFlightView.this,
-                                "You already have a booking for flight #" + flightId, "Error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                }
-
-                // Calculate price
+                // 2. Calculate price and fees
                 double currentPrice = flight.getCurrentPrice(fbs.getSystemDate());
                 double cancellationFee = flight.getCancellationFee();
 
-                // Create booking
-                Booking booking = new Booking(currentUser, flight, fbs.getSystemDate(),
-                        currentPrice, cancellationFee, infantCheckBox.isSelected(), vegetarianCheckBox.isSelected());
+                // 3. RESERVE SEAT AND CREATE BOOKING
+                flight.bookSeat(seat);
+
+                Booking booking = new Booking(
+                        currentUser,
+                        flight,
+                        fbs.getSystemDate(),
+                        currentPrice,
+                        cancellationFee,
+                        infantCheckBox.isSelected(),
+                        vegetarianCheckBox.isSelected(),
+                        seat
+                );
 
                 currentUser.addBooking(booking);
                 flight.addPassenger(currentUser);
 
                 JOptionPane.showMessageDialog(BookFlightView.this,
-                        "Booking successful!\n" +
+                        "✓ Booking successful!\n" +
                                 "Flight: " + flight.getFlightNumber() + "\n" +
-                                "Price: £" + String.format("%.2f", currentPrice) + "\n" +
-                                "Cancellation Fee: £" + String.format("%.2f", cancellationFee),
+                                "Seat: " + seat + "\n" +
+                                "Price: Rs." + String.format("%.2f", currentPrice),
                         "Success", JOptionPane.INFORMATION_MESSAGE);
 
                 // Clear form
@@ -144,7 +183,6 @@ public class BookFlightView extends JPanel {
                 infantCheckBox.setSelected(false);
                 vegetarianCheckBox.setSelected(false);
 
-                // Notify parent of success
                 if (onBookingSuccess != null) {
                     onBookingSuccess.run();
                 }
